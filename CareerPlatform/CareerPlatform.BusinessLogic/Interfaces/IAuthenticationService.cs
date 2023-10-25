@@ -3,11 +3,9 @@ using CareerPlatform.DataAccess.Entities;
 
 namespace CareerPlatform.BusinessLogic.Interfaces
 {
-    public interface IUserService
+    public interface IAuthenticationService
     {
-        Task<User> SignUpNewUserAsync(UserSignUpDto userdto);
-        Task<User> GetUserByIdAsync(Guid userId);
-        Task DeleteUserAsync(Guid userId);
         Task<string> AuthenticateUserAsync(UserLoginDto loginDto);
+        Task<User> SignUpNewUserAsync(UserSignUpDto userdto);
     }
 }

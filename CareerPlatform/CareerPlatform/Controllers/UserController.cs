@@ -7,8 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CareerPlatform.API.Controllers
 {
-    //[Route("api/[controller]")]
-    [Route("api/user")]
+    [Route("api/")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -18,7 +17,6 @@ namespace CareerPlatform.API.Controllers
         {
             _userService = userService;
             _logger = logger;
-
         }
 
         /// <summary>
@@ -26,13 +24,15 @@ namespace CareerPlatform.API.Controllers
         /// </summary>
         /// <response code="200">Success</response>
         /// <response code="400">Bad request</response>
+        /// <response code="409">Conflict error</response>
         /// <response code="500">Server side error</response>
         [HttpPost]
-        [Route("signup")]
+        [Route("user")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> SignUp([FromForm] UserSignUpDto userSignUpDto)
+        public async Task<IActionResult> User([FromForm] UserSignUpDto userSignUpDto)
         {
             try
             {
@@ -45,14 +45,15 @@ namespace CareerPlatform.API.Controllers
                 _logger.LogError($"Client side error occured: {e.Message}");
                 return BadRequest(e.Message);
             }
+            catch (ArgumentNullException e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
+            }
             catch (Exception e)
             {
                 _logger.LogError($"Server side error occured: {e.Message}");
                 return BadRequest(e.Message);
-            }
-            finally
-            {
-                //executes some code is all unsuccessfull
             }
         }
 
@@ -61,20 +62,22 @@ namespace CareerPlatform.API.Controllers
         /// </summary>
         /// <response code="200">Success</response>
         /// <response code="400">Bad request</response>
+        /// <response code="404">Not found</response>
         /// <response code="500">Server side error</response>
         [HttpGet]
-        [Route("login")]
+        [Route("user/authentication")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)] // ar cia turi buti 401? 
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Login(UserLoginDto userLoginDto)
+        public async Task<IActionResult> Authentication([FromQuery]UserLoginDto userLoginDto) // negali buti from query
         {
             try
             {
                 string authenticatedUser = await _userService.AuthenticateUserAsync(userLoginDto);
                 if (authenticatedUser == null)
                 {
-                    return BadRequest("You entered wrong details."); //konkretizuoti kuris netinkamas
+                    return BadRequest("You entered wrong details.");
                 }
 
                 return Ok(authenticatedUser);
@@ -86,7 +89,13 @@ namespace CareerPlatform.API.Controllers
             }
             catch (UserNotFountException e)
             {
+                // cia turi buti 401 status code?
                 _logger.LogError(e.Message);
+                return BadRequest(e.Message);
+            }
+            catch(Exception e)
+            {
+                _logger.LogError($"Server side error occured: {e.Message}");
                 return BadRequest(e.Message);
             }
         }
@@ -94,35 +103,38 @@ namespace CareerPlatform.API.Controllers
         /// <summary>
         /// Deletes user from database
         /// </summary>
-        /// <response code="200">Success</response>
+        /// <response code="204">No content</response>
         /// <response code="400">Bad request</response>
         /// <response code="500">Server side error</response>
         [HttpDelete]
-        [Route("delete/{id}")]
+        [Route("user/{id}")]
         [Authorize(Roles = "Admin")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Delete(Guid userId)
+        public async Task<IActionResult> User([FromQuery]Guid userId)
         {
-            //try
-            //{
-            await _userService.DeleteUserAsync(userId);
-            //    if (_userService.GetUserByIdAsync(userId) == null)
-            //    {
-            //        return Ok("User successfully deleted.");
-            //    }
-            //}
-            //catch ()
-            //{
+            try
+            {
+                await _userService.DeleteUserAsync(userId);
 
-            //}
-            //catch ()
-            //{
+                if (_userService.GetUserByIdAsync(userId) == null)
+                {
+                    return NoContent();
+                }
+            }
+            catch (ArgumentNullException e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Server side error occured: {e.Message}");
+                return BadRequest(e.Message);
+            }
 
-            //}
-
-            return Ok();
+            return NoContent();
         }
 
         //update users password when the password is known

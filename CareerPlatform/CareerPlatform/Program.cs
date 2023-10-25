@@ -19,6 +19,7 @@ builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.Re
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService > ();
 
 builder.Services.AddDbContext<PlatformDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SQLConnection")), ServiceLifetime.Scoped);
 builder.Services.AddEndpointsApiExplorer();
@@ -84,23 +85,6 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
-
-
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-//{
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuer = true,
-//        ValidateAudience = true,
-//        ValidateLifetime = true,
-//        ValidateIssuerSigningKey = true,
-//        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-//        ValidAudience = builder.Configuration["Jwt:Audience"],
-//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-//    };
-
-//});
-
 
 var app = builder.Build();
 

@@ -1,4 +1,6 @@
-﻿namespace CareerPlatform.Shared.ValueObjects.enums
+﻿using System.Globalization;
+
+namespace CareerPlatform.Shared.ValueObjects.enums
 {
     public enum LegalTypes
     {
@@ -8,3 +10,5 @@
         II
     }
 }
+
+

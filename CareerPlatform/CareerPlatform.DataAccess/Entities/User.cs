@@ -13,7 +13,8 @@ namespace CareerPlatform.DataAccess.Entities
         [Required]
         public string Email { get; set; }
         [Required]
-        public byte[] PasswordHash { get; set; } //minimum 6digits. This includes 1 special sign and, one number and one capital letter. Validation
+        //minimum 6digits. This includes 1 special sign and, one number and one capital letter. Validation
+        public byte[] PasswordHash { get; set; } 
         public byte[] PasswordSalt { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? DisabledAt { get; set; }

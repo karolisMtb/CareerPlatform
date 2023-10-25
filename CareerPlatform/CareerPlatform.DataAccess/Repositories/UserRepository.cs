@@ -4,6 +4,7 @@ using CareerPlatform.DataAccess.Entities;
 using CareerPlatform.DataAccess.Interfaces;
 using CareerPlatform.Shared.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography.X509Certificates;
 
 namespace CareerPlatform.DataAccess.Repositories
 {
@@ -29,11 +30,25 @@ namespace CareerPlatform.DataAccess.Repositories
             return await _platformDbContext.Users.AnyAsync(x => x.UserName == userDto.userName || x.Email == userDto.email);
         }
 
-        public Task DeleteUserAsync(Guid userId)
+        public async Task DeleteUserAsync(Guid userId)
         {
-            //implement delete method
+            var userToDelete = await _platformDbContext.Users
+                .Where(x => x.Id == userId)
+                .Include(p => p.Profile).FirstOrDefaultAsync();
 
-            throw new NotImplementedException();
+            if(userToDelete != null)
+            {
+                if(userToDelete.Profile != null)
+                {
+                    _platformDbContext.Remove(userToDelete.Profile.Cv);
+                    _platformDbContext.Remove(userToDelete.Profile.Address);
+                }
+
+                _platformDbContext.Remove(userToDelete.Profile);
+                _platformDbContext.Remove(userToDelete);
+            }
+
+            await _unitOfWork.SaveChangesAsyn();
         }
 
         public async Task<User> GetUserByIdAsync(Guid userId)
