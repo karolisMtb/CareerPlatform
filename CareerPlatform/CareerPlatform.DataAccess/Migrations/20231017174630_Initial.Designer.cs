@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CareerPlatform.DataAccess.Migrations
 {
-    [DbContext(typeof(PlatformDbContext))]
+    [DbContext(typeof(ApplicationDbContext))]
     [Migration("20231017174630_Initial")]
     partial class Initial
     {

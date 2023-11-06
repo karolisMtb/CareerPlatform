@@ -10,7 +10,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CareerPlatform.BusinessLogic.Services
+namespace CareerPlatform.BusinessLogic.Services.SecurityServices
 {
     public class AuthenticationService : IAuthenticationService
     {
@@ -23,7 +23,7 @@ namespace CareerPlatform.BusinessLogic.Services
         }
         public async Task<string> AuthenticateUserAsync(UserLoginDto loginDto)
         {
-            User currentUser = await _userRepository.GetUserByLoginCredentialsAsync(loginDto.credential); 
+            User currentUser = await _userRepository.GetUserByLoginCredentialsAsync(loginDto.credential);
 
             if (!VerifyPasswordHash(loginDto.password, currentUser.PasswordHash, currentUser.PasswordSalt))
             {

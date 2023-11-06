@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using CareerPlatform.Shared.ValueObjects.enums;
 
 namespace CareerPlatform.DataAccess.Entities
 {
@@ -18,5 +19,6 @@ namespace CareerPlatform.DataAccess.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? DisabledAt { get; set; }
         public BusinessProfile? Profile { get; set; }
+        public Roles Role { get; set; } = Roles.Business;
     }
 }

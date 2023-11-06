@@ -9,5 +9,6 @@ namespace CareerPlatform.BusinessLogic.Interfaces
         Task<User> GetUserByIdAsync(Guid userId);
         Task DeleteUserAsync(Guid userId);
         Task<string> AuthenticateUserAsync(UserLoginDto loginDto);
+        Task<User> GetByEmailAddressAsync(string email);
     }
 }

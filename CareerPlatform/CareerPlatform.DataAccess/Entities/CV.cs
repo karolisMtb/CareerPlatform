@@ -13,7 +13,7 @@ namespace CareerPlatform.DataAccess.Entities
         public string PhoneNumber { get; set; }
         public ProfileImage? ProfileImage { get; set; }
         public string City { get; set; }
-        public List<JobExperience> JobExperience { get; set; } = new List<JobExperience>();
+        public List<JobExperience>? JobExperience { get; set; } = new List<JobExperience>();
         public string? AboutMe { get; set; }
     }
 }

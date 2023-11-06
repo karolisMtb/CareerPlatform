@@ -10,5 +10,6 @@ namespace CareerPlatform.DataAccess.Interfaces
         Task<User> GetUserByLoginCredentialsAsync(string credential);
         Task<User> GetUserByIdAsync(Guid userId);
         Task DeleteUserAsync(Guid userId);
+        Task<User> GetByEmailAddressAsync(string email);
     }
 }

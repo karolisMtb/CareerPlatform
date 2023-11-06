@@ -5,12 +5,12 @@ namespace CareerPlatform.DataAccess.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly PlatformDbContext _platformDbContext;
-        public UnitOfWork(PlatformDbContext platformDbContext)
+        private readonly ApplicationDbContext _platformDbContext;
+        public UnitOfWork(ApplicationDbContext platformDbContext)
         {
             _platformDbContext = platformDbContext;
         }
-        public async Task SaveChangesAsyn()
+        public async Task SaveChangesAsync()
         {
             await _platformDbContext.SaveChangesAsync();
         }

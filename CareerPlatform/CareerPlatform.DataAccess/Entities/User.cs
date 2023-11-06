@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using CareerPlatform.Shared.ValueObjects.enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace CareerPlatform.DataAccess.Entities
 {
@@ -11,13 +13,15 @@ namespace CareerPlatform.DataAccess.Entities
         [Required]
         public string UserName { get; set; }
         [Required]
+        [EmailAddress]
         public string Email { get; set; }
-        [Required]
-        //minimum 6digits. This includes 1 special sign and, one number and one capital letter. Validation
-        public byte[] PasswordHash { get; set; } 
-        public byte[] PasswordSalt { get; set; }
+        //[Required]
+        //[MinLength(12)]
+        //public byte[] PasswordHash { get; set; }
+        //public byte[] PasswordSalt { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? DisabledAt { get; set; }
         public UserProfile? Profile { get; set; }
+        public Roles Role { get; set; } = Roles.User;
     }
 }

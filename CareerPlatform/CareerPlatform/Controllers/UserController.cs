@@ -3,20 +3,27 @@ using CareerPlatform.DataAccess.DTOs;
 using CareerPlatform.DataAccess.Entities;
 using CareerPlatform.Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CareerPlatform.API.Controllers
 {
+    //user controller bus viskas, kas keis user ir dependencies state(CV, email ir panasiai)
+
     [Route("api/")]
     [ApiController]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
         private readonly ILogger<UserController> _logger;
-        public UserController(IUserService userService, ILogger<UserController> logger)
+        private readonly UserManager<IdentityUser> _userManager;
+        public UserController(IUserService userService, 
+            ILogger<UserController> logger,
+            UserManager<IdentityUser> userManager)
         {
             _userService = userService;
             _logger = logger;
+            _userManager = userManager;
         }
 
         /// <summary>
@@ -26,14 +33,15 @@ namespace CareerPlatform.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="409">Conflict error</response>
         /// <response code="500">Server side error</response>
-        [HttpPost]
-        [Route("user")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPost]
+        [Route("user")]
         public async Task<IActionResult> User([FromForm] UserSignUpDto userSignUpDto)
         {
+            // validation reikia del input username, password(min 12 simboliu) ir email, kad butu email. Regex
             try
             {
                 User user = await _userService.SignUpNewUserAsync(userSignUpDto);
@@ -57,6 +65,9 @@ namespace CareerPlatform.API.Controllers
             }
         }
 
+
+        //sita endpointa trinti arba iskomentuoti
+
         /// <summary>
         /// Logs in existing user
         /// </summary>
@@ -64,12 +75,12 @@ namespace CareerPlatform.API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="404">Not found</response>
         /// <response code="500">Server side error</response>
-        [HttpGet]
-        [Route("user/authentication")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)] // ar cia turi buti 401? 
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet]
+        [Route("user/authentication")]
         public async Task<IActionResult> Authentication([FromQuery]UserLoginDto userLoginDto) // negali buti from query
         {
             try
@@ -106,13 +117,13 @@ namespace CareerPlatform.API.Controllers
         /// <response code="204">No content</response>
         /// <response code="400">Bad request</response>
         /// <response code="500">Server side error</response>
-        [HttpDelete]
-        [Route("user/{id}")]
-        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> User([FromQuery]Guid userId)
+        [HttpDelete]
+        [Route("user")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> User(Guid userId)
         {
             try
             {
@@ -137,9 +148,6 @@ namespace CareerPlatform.API.Controllers
             return NoContent();
         }
 
-        //update users password when the password is known
         //forgot password https://medium.com/@m.anilkarasah/reset-password-implementation-inside-net-core-web-api-9559dac1d2db
-
-
     }
 }

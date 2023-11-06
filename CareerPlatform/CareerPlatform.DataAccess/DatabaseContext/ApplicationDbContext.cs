@@ -1,11 +1,13 @@
 ﻿using CareerPlatform.DataAccess.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CareerPlatform.DataAccess.DatabaseContext
 {
-    public sealed class PlatformDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
-        public PlatformDbContext(DbContextOptions<PlatformDbContext> options) : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
@@ -22,6 +24,7 @@ namespace CareerPlatform.DataAccess.DatabaseContext
         public DbSet<JobExperience> JobExperiences { get; set; }
         public DbSet<LogoImage> LogoImages { get; set; }
         public DbSet<ReviewResponse> ReviewResponses { get; set; }
+        public DbSet<ResetPasswordEntry> ResetPasswordEntries { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

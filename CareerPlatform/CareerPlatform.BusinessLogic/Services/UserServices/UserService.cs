@@ -2,10 +2,9 @@
 using CareerPlatform.DataAccess.DTOs;
 using CareerPlatform.DataAccess.Entities;
 using CareerPlatform.DataAccess.Interfaces;
-using CareerPlatform.Shared.Exceptions;
 using Microsoft.Extensions.Logging;
 
-namespace CareerPlatform.BusinessLogic.Services
+namespace CareerPlatform.BusinessLogic.Services.UserServices
 {
     public class UserService : IUserService
     {
@@ -16,8 +15,8 @@ namespace CareerPlatform.BusinessLogic.Services
         //prideti fluentvalidator
 
         public UserService(
-            IUserRepository userRepository, 
-            IAuthenticationService authenticationService, 
+            IUserRepository userRepository,
+            IAuthenticationService authenticationService,
             ILogger<UserService> logger)
         {
             _userRepository = userRepository;
@@ -53,6 +52,17 @@ namespace CareerPlatform.BusinessLogic.Services
         public async Task<string> AuthenticateUserAsync(UserLoginDto loginDto)
         {
             return await _authenticationService.AuthenticateUserAsync(loginDto);
+        }
+
+        public async Task<User> GetByEmailAddressAsync(string email)
+        {
+            if(!(email is null) || email != string.Empty)
+            {
+                var user = await _userRepository.GetByEmailAddressAsync(email);
+                return user;
+            }
+
+            return null;
         }
     }
 }
