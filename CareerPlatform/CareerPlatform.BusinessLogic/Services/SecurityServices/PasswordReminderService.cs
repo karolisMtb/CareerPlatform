@@ -1,73 +1,51 @@
 ﻿using CareerPlatform.BusinessLogic.Interfaces;
-using CareerPlatform.DataAccess.Entities;
-using CareerPlatform.DataAccess.Interfaces;
-using System.Security.Cryptography;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
+using CareerPlatform.Shared.Exceptions;
 
 namespace CareerPlatform.BusinessLogic.Services.SecurityServices
 {
     public sealed class PasswordReminderService : IPasswordReminderService
     {
-        private readonly IResetPasswordEntryRepository _resetPasswordEntryRepository;
-        public PasswordReminderService(IResetPasswordEntryRepository resetPasswordEntryRepository)
+        private readonly UserManager<IdentityUser> _userManager;
+        public PasswordReminderService(UserManager<IdentityUser> userManager)
         {
-            _resetPasswordEntryRepository = resetPasswordEntryRepository;
+            _userManager = userManager;
         }
 
-        public async Task AddAsync(ResetPasswordEntry resetPasswordEntry)
+        public async Task<bool> ValidatePasswordResetRequestAsync(string email, string token)
         {
-            await _resetPasswordEntryRepository.AddAsync(resetPasswordEntry);
-        }
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+            var decodedEmail = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(email));
+            bool validEmail = false;
 
-        public async Task<string> DecodeHashedTokenAsync(byte[] hashedToken)
-        {
-            if(hashedToken == null)
+            IdentityUser user = await _userManager.FindByEmailAsync(decodedEmail);
+
+            if(user == null)
             {
-                throw new ArgumentNullException("No token was given.");
+                throw new UserNotFoundException("User could not be found. Please check your email and try again");
             }
 
-            using var hmac = new HMACSHA256();
-            var decodedToken = hmac.ComputeHash(hashedToken);
-            return Encoding.UTF8.GetString(decodedToken);
-        }
+            bool validToken = await _userManager.VerifyUserTokenAsync(
+                user,
+                "JWT",
+                "Password recovery",
+                decodedToken
+                );
+            if(validToken == false)
+            {
+                validEmail = false;
+                throw new ArgumentNullException("Invalid argument");
+            }
 
-        public async Task<ResetPasswordEntry> GetByUserIdAsync(Guid userId)
-        {
-            return await _resetPasswordEntryRepository.GetResetPasswordEntryByUserId(userId);
-        }
+            if(validToken == true)
+            {
+                validEmail = true;
+                return validEmail;
+            }
 
-        public async Task InvalidateAsync(ResetPasswordEntry resetPasswordEntry)
-        {
-            await _resetPasswordEntryRepository.InvalidateAsync(resetPasswordEntry);
+            return validEmail;
         }
     }
 }
-
-//Token Generation:
-
-//Method to generate random tokens with options for length and character set (e.g., alphanumeric, Base64, Base62).
-//Method to generate secure random passwords.
-//Password Hashing:
-
-//Methods to hash passwords using different algorithms (e.g., SHA - 256, bcrypt, Argon2).
-//Methods to verify password hashes against user input.
-//Token/Password Validation:
-
-//Method to validate tokens or passwords based on certain criteria (e.g., length requirements, character set requirements).
-//Expiry and Time-Related Functions:
-
-//Methods to set and check the expiry date of tokens or passwords.
-//Functions to calculate time differences (e.g., remaining time until expiry).
-//Salting(for password hashing):
-
-//Functions to generate and manage unique salts for each password.
-//Other Security Features:
-
-//Security - related configurations, like iterations for password hashing algorithms.
-//Functions for comparing and timing constant-time comparisons for security purposes.
-//Error Handling:
-
-//Handling exceptions and error reporting for various operations.
-//Configuration:
-
-//Configuration options for different aspects, such as hashing algorithms and default settings.

@@ -10,14 +10,15 @@ namespace CareerPlatform.API.Controllers
 {
     //user controller bus viskas, kas keis user ir dependencies state(CV, email ir panasiai)
 
-    [Route("api/")]
+    [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
         private readonly ILogger<UserController> _logger;
         private readonly UserManager<IdentityUser> _userManager;
-        public UserController(IUserService userService, 
+        public UserController(
+            IUserService userService, 
             ILogger<UserController> logger,
             UserManager<IdentityUser> userManager)
         {
@@ -26,91 +27,7 @@ namespace CareerPlatform.API.Controllers
             _userManager = userManager;
         }
 
-        /// <summary>
-        /// Creates new user account
-        /// </summary>
-        /// <response code="200">Success</response>
-        /// <response code="400">Bad request</response>
-        /// <response code="409">Conflict error</response>
-        /// <response code="500">Server side error</response>
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [HttpPost]
-        [Route("user")]
-        public async Task<IActionResult> User([FromForm] UserSignUpDto userSignUpDto)
-        {
-            // validation reikia del input username, password(min 12 simboliu) ir email, kad butu email. Regex
-            try
-            {
-                User user = await _userService.SignUpNewUserAsync(userSignUpDto);
-
-                return Ok($"User {user.UserName} was created successfully.");
-            }
-            catch (ExistingUserFoundException e)
-            {
-                _logger.LogError($"Client side error occured: {e.Message}");
-                return BadRequest(e.Message);
-            }
-            catch (ArgumentNullException e)
-            {
-                _logger.LogError(e.Message);
-                return BadRequest(e.Message);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError($"Server side error occured: {e.Message}");
-                return BadRequest(e.Message);
-            }
-        }
-
-
-        //sita endpointa trinti arba iskomentuoti
-
-        /// <summary>
-        /// Logs in existing user
-        /// </summary>
-        /// <response code="200">Success</response>
-        /// <response code="400">Bad request</response>
-        /// <response code="404">Not found</response>
-        /// <response code="500">Server side error</response>
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)] // ar cia turi buti 401? 
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [HttpGet]
-        [Route("user/authentication")]
-        public async Task<IActionResult> Authentication([FromQuery]UserLoginDto userLoginDto) // negali buti from query
-        {
-            try
-            {
-                string authenticatedUser = await _userService.AuthenticateUserAsync(userLoginDto);
-                if (authenticatedUser == null)
-                {
-                    return BadRequest("You entered wrong details.");
-                }
-
-                return Ok(authenticatedUser);
-            }
-            catch (PasswordMismatchException e)
-            {
-                _logger.LogError(e.Message);
-                return BadRequest(e.Message);
-            }
-            catch (UserNotFountException e)
-            {
-                // cia turi buti 401 status code?
-                _logger.LogError(e.Message);
-                return BadRequest(e.Message);
-            }
-            catch(Exception e)
-            {
-                _logger.LogError($"Server side error occured: {e.Message}");
-                return BadRequest(e.Message);
-            }
-        }
-
+        //delete user
         /// <summary>
         /// Deletes user from database
         /// </summary>
@@ -120,18 +37,23 @@ namespace CareerPlatform.API.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize]
         [HttpDelete]
-        [Route("user")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> User(Guid userId)
+        public async Task<IActionResult> User(string email)
         {
             try
             {
-                await _userService.DeleteUserAsync(userId);
-
-                if (_userService.GetUserByIdAsync(userId) == null)
+                if(!(email is null) || !(email == string.Empty))
                 {
-                    return NoContent();
+                    IdentityResult identityResult = await _userService.DeleteIdentityUserAsync(email);
+                    IdentityResult result = await _userService.DeleteUserAsync(email);
+
+                    if(!identityResult.Succeeded || !result.Succeeded)
+                    {
+                        return BadRequest("User could not be deleted. Please try again");
+                    }
+
+                    return Ok(); //turetu buti redirect to home page? Issiaiskinti
                 }
             }
             catch (ArgumentNullException e)
@@ -148,6 +70,6 @@ namespace CareerPlatform.API.Controllers
             return NoContent();
         }
 
-        //forgot password https://medium.com/@m.anilkarasah/reset-password-implementation-inside-net-core-web-api-9559dac1d2db
+
     }
 }

@@ -21,11 +21,7 @@ builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.Re
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-builder.Services.AddScoped<IForgotPasswordJobHandler, ForgotPasswordJobHandler>();
 builder.Services.AddScoped<IPasswordReminderService, PasswordReminderService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IResetPasswordEntryRepository, ResetPasswordEntryRepository>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("ConnStr")), ServiceLifetime.Scoped);

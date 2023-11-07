@@ -24,8 +24,6 @@ namespace CareerPlatform.DataAccess.DatabaseContext
         public DbSet<JobExperience> JobExperiences { get; set; }
         public DbSet<LogoImage> LogoImages { get; set; }
         public DbSet<ReviewResponse> ReviewResponses { get; set; }
-        public DbSet<ResetPasswordEntry> ResetPasswordEntries { get; set; }
-
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

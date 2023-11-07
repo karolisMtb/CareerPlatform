@@ -83,7 +83,7 @@ namespace CareerPlatform.DataAccess.Repositories
             User user = await _platformDbContext.Users.Where(u => u.Id == userId).FirstAsync();
             if (user == null)
             {
-                throw new UserNotFountException("User with your requested id is not found.");
+                throw new UserNotFoundException("User with your requested id is not found.");
             }
 
             return user;
@@ -95,7 +95,7 @@ namespace CareerPlatform.DataAccess.Repositories
 
             if (currentUser == null)
             {
-                throw new UserNotFountException($"User with login '{credential}' was not found.");
+                throw new UserNotFoundException($"User with login '{credential}' was not found.");
             }
             return currentUser;
         }

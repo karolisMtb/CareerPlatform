@@ -1,5 +1,6 @@
 ﻿using CareerPlatform.BusinessLogic.Interfaces;
 using CareerPlatform.DataAccess.DTOs;
+using CareerPlatform.Shared.Exceptions;
 using JWTAuthentication.NET6._0.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 
@@ -22,7 +24,7 @@ namespace CareerPlatform.API.Controllers
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthenticateController> _logger;
         private readonly IEmailSender _emailSender;
-
+        private readonly IPasswordReminderService _passwordReminderService;
         private readonly IUserService _userService;
 
         public AuthenticateController(
@@ -30,13 +32,17 @@ namespace CareerPlatform.API.Controllers
             RoleManager<IdentityRole> roleManager,
             IConfiguration configuration,
             ILogger<AuthenticateController> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IUserService userService,
+            IPasswordReminderService passwordReminderService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
             _logger = logger;
             _emailSender = emailSender;
+            _userService = userService;
+            _passwordReminderService = passwordReminderService;
         }
 
         /// <summary>
@@ -96,7 +102,7 @@ namespace CareerPlatform.API.Controllers
             }
         }
 
-        //nemeta validation klaidu!!
+
         /// <summary>
         /// Registers new user
         /// </summary>
@@ -128,7 +134,10 @@ namespace CareerPlatform.API.Controllers
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
-                if (!result.Succeeded)
+
+                var nonIdentityUser = await _userService.CreateNonIdentityUserAsync(user);
+
+                if (!result.Succeeded && nonIdentityUser is not null)
                 {
                     return BadRequest("User creation failed! Please check user details and try again.");
                 }
@@ -147,6 +156,9 @@ namespace CareerPlatform.API.Controllers
             }
            
         }
+
+
+
 
         /// <summary>
         /// Handles password reset request
@@ -187,7 +199,7 @@ namespace CareerPlatform.API.Controllers
         }
 
         /// <summary>
-        /// Generates and sends password reset info
+        /// Validates password reset request params
         /// </summary>
         /// <response code="200">Success</response>> 
         /// <response code="400">Bad request</response>> 
@@ -198,19 +210,33 @@ namespace CareerPlatform.API.Controllers
         [Route("reset-password")]
         public async Task<IActionResult> ResetPassword(string email, string token)
         {
-            //nera try catch
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
             {
                 return BadRequest("Invalid parameters");
             }
 
-            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
-            var decodedEmail = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(email));
-
-            //issiaiskinti kaip su paswordu
-            var model = new ResetPasswordRequestDto(decodedEmail, decodedToken, null);
-
-            return Ok(model);
+            try
+            {
+                bool validRequest = await _passwordReminderService.ValidatePasswordResetRequestAsync(email, token);
+                //return Redirect(); //param: url i kur bus redirected
+                return Ok(validRequest);
+            }
+            catch (UserNotFoundException e)
+            {
+                _logger.LogError($"Client side error occured: {e.Message}");
+                return NotFound(e.Message);
+            }
+            catch (ArgumentNullException e)
+            {
+                _logger.LogError($"Server side error occured: {e.Message}");
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                //return LocalRedirect(gal i password input form?); //pasidometi kur tas redirect nukreipia
+                return BadRequest(e.Message);
+            }            
         }
 
         /// <summary>
@@ -233,14 +259,14 @@ namespace CareerPlatform.API.Controllers
 
             try
             {
-                var user = await _userManager.FindByEmailAsync(request.UserEmail);
+                IdentityUser user = await _userManager.FindByEmailAsync(request.UserEmail);
 
                 if (user == null)
                 {
                     return BadRequest($"User with this email {request.UserEmail} was not found");
                 }
 
-                var result = await _userManager.ResetPasswordAsync(user, request.Token, request.Password);
+                IdentityResult result = await _userManager.ResetPasswordAsync(user, request.Token, request.Password);
 
                 if (result.Succeeded)
                 {
@@ -258,6 +284,49 @@ namespace CareerPlatform.API.Controllers
 
             }
         }
+
+        /// <summary>
+        /// Changes user password
+        /// </summary>
+        /// <response code="200">Success</response>
+        /// <response code="400">Bad request</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="500">Server side error</response>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize]
+        [HttpPatch]
+        [Route("change-password")]
+        //is vending ar companyX rasti kaip gauti useri, kuris yra siuo metu prisilogines ir perduoti i si endpoint
+        public async Task<IActionResult> ChangeUserPassword(
+            string userEmail, 
+            [FromBody] string oldPassword, 
+            [FromBody] string newPassword)
+        {
+            try
+            {
+                IdentityResult result = await _userService.ChangeUserPasswordAsync(userEmail, oldPassword, newPassword);
+
+                if (!result.Succeeded)
+                {
+                    return BadRequest("Password could not be changed. Something went wrong");
+                }
+            }
+            catch (TargetInvocationException e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
+            }
+            catch(Exception e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
+            }
+            return Ok("Password was changed successfully");
+        }
+
         private JwtSecurityToken GetToken(List<Claim> authClaims)
         {
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
