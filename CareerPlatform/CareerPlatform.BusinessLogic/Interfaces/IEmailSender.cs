@@ -1,7 +1,9 @@
-﻿namespace CareerPlatform.BusinessLogic.Interfaces
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace CareerPlatform.BusinessLogic.Interfaces
 {
     public interface IEmailSender
     {
-        Task SendEmailAsync(string email, string subject, string htmlMessage);
+        Task ResetPasswordAsync(IdentityUser user);
     }
 }

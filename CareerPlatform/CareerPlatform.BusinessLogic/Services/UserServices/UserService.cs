@@ -1,9 +1,8 @@
 ﻿using CareerPlatform.BusinessLogic.Interfaces;
-using CareerPlatform.DataAccess.DTOs;
 using CareerPlatform.DataAccess.Entities;
 using CareerPlatform.DataAccess.Interfaces;
+using CareerPlatform.Shared.ValueObjects.enums;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 using System.Reflection;
 
 namespace CareerPlatform.BusinessLogic.Services.UserServices
@@ -11,22 +10,19 @@ namespace CareerPlatform.BusinessLogic.Services.UserServices
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        private readonly ILogger<UserService> _logger;
         private readonly UserManager<IdentityUser> _userManager;
 
         //prideti fluentvalidator
 
         public UserService(
             IUserRepository userRepository,
-            ILogger<UserService> logger,
             UserManager<IdentityUser> userManager)
         {
             _userRepository = userRepository;
-            _logger = logger;
             _userManager = userManager;
         }
 
-        public async Task<User> CreateNonIdentityUserAsync(IdentityUser user)
+        public async Task<IdentityResult> CreateNonIdentityUserAsync(IdentityUser user)
         {
             if(user == null)
             {
@@ -38,7 +34,7 @@ namespace CareerPlatform.BusinessLogic.Services.UserServices
             if(newNonIdentityuser is not null)
             {
                 await _userRepository.AddAsync(newNonIdentityuser);
-                return newNonIdentityuser;
+                return IdentityResult.Success;
             }
 
             return null;
@@ -57,7 +53,15 @@ namespace CareerPlatform.BusinessLogic.Services.UserServices
         }
 
 
+        //public async Task<User> GetUserByIdAsync(Guid userId)
+        //{
+        //    if (userId == Guid.Empty)
+        //    {
+        //        throw new ArgumentNullException("Please specify the user you are looking for.");
+        //    }
 
+        //    return await _userRepository.GetUserByIdAsync(userId);
+        //}
 
         public async Task<User> GetByEmailAddressAsync(string email)
         {
@@ -70,15 +74,27 @@ namespace CareerPlatform.BusinessLogic.Services.UserServices
             return null;
         }
 
-        public Task<IdentityResult> DeleteUserAsync(string email)
-        { 
-            //add all dependecies incl. Profile, foto, CV
-            throw new NotImplementedException();
+        public async Task<IdentityResult> DeleteIdentityUserAsync(string email)
+        {
+            IdentityUser user = await _userManager.FindByEmailAsync(email);
+
+            IdentityResult roleResult = await _userManager.RemoveFromRoleAsync(user, Roles.User.ToString());
+            IdentityResult deleteResult = await _userManager.DeleteAsync(user);
+            
+            if(roleResult.Succeeded && deleteResult.Succeeded)
+            {
+                return IdentityResult.Success;
+            }
+
+            return IdentityResult.Failed();
         }
 
-        public Task<IdentityResult> DeleteIdentityUserAsync(string email)
+        public async Task<IdentityResult> DeleteNonIdentityUserAsync(string email)
         {
-            throw new NotImplementedException();
+            User user = await _userRepository.GetUserByLoginCredentialsAsync(email);
+            IdentityResult result = await _userRepository.DeleteUserAsync(user.Id);
+
+            return result;
         }
     }
 }
