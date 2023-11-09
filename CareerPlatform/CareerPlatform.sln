@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CareerPlatform.API", "CareerPlatform\CareerPlatform.API.csproj", "{E422D479-C9DC-4629-8921-639F323BC948}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CareerPlatform", "CareerPlatform\CareerPlatform.csproj", "{E422D479-C9DC-4629-8921-639F323BC948}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CareerPlatform.BusinessLogic", "CareerPlatform.BusinessLogic\CareerPlatform.BusinessLogic.csproj", "{D0F94206-692E-43EF-9DFD-A3171848CCA8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CareerPlatform.BusinessLogic", "CareerPlatform.BusinessLogic\CareerPlatform.BusinessLogic.csproj", "{D0F94206-692E-43EF-9DFD-A3171848CCA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CareerPlatform.DataAccess", "CareerPlatform.DataAccess\CareerPlatform.DataAccess.csproj", "{F69D2FE3-4453-4661-9DA9-483BB7799069}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CareerPlatform.DataAccess", "CareerPlatform.DataAccess\CareerPlatform.DataAccess.csproj", "{F69D2FE3-4453-4661-9DA9-483BB7799069}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CareerPlatform.Shared", "CareerPlatform.Shared\CareerPlatform.Shared.csproj", "{675B4515-40C0-40F1-870D-317D32501BA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CareerPlatform.Shared", "CareerPlatform.Shared\CareerPlatform.Shared.csproj", "{675B4515-40C0-40F1-870D-317D32501BA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CareerPlatform.Tests", "CareerPlatform.Tests\CareerPlatform.Tests.csproj", "{43325BA6-EB68-41A4-8AF7-A6DBAFED67DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CareerPlatform.Tests", "CareerPlatform.Tests\CareerPlatform.Tests.csproj", "{43325BA6-EB68-41A4-8AF7-A6DBAFED67DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

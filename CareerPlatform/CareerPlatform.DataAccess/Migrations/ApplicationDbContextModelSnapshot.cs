@@ -4,7 +4,6 @@ using CareerPlatform.DataAccess.DatabaseContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,18 +11,16 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CareerPlatform.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231105120827_addedIdentityFramework")]
-    partial class addedIdentityFramework
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.12")
+                .HasAnnotation("ProductVersion", "6.0.24")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
             modelBuilder.Entity("CareerPlatform.DataAccess.Entities.Address", b =>
                 {
@@ -106,41 +103,6 @@ namespace CareerPlatform.DataAccess.Migrations
                     b.ToTable("BusinessUsers");
                 });
 
-            modelBuilder.Entity("CareerPlatform.DataAccess.Entities.CV", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AboutMe")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("ProfileImageId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProfileImageId");
-
-                    b.ToTable("CVs");
-                });
-
             modelBuilder.Entity("CareerPlatform.DataAccess.Entities.Company", b =>
                 {
                     b.Property<Guid>("Id")
@@ -193,6 +155,41 @@ namespace CareerPlatform.DataAccess.Migrations
                     b.HasIndex("LogoId");
 
                     b.ToTable("Companies");
+                });
+
+            modelBuilder.Entity("CareerPlatform.DataAccess.Entities.CV", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AboutMe")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ProfileImageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileImageId");
+
+                    b.ToTable("CVs");
                 });
 
             modelBuilder.Entity("CareerPlatform.DataAccess.Entities.Financial", b =>
@@ -287,29 +284,6 @@ namespace CareerPlatform.DataAccess.Migrations
                     b.ToTable("ProfileImages");
                 });
 
-            modelBuilder.Entity("CareerPlatform.DataAccess.Entities.ResetPasswordEntry", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte[]>("HashedToken")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<DateTimeOffset>("Timestamp")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ResetPasswordEntries");
-                });
-
             modelBuilder.Entity("CareerPlatform.DataAccess.Entities.Review", b =>
                 {
                     b.Property<Guid>("Id")
@@ -374,13 +348,8 @@ namespace CareerPlatform.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<byte[]>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<byte[]>("PasswordSalt")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                    b.Property<string>("IdentityUserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid?>("ProfileId")
                         .HasColumnType("uniqueidentifier");
@@ -393,6 +362,8 @@ namespace CareerPlatform.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IdentityUserId");
 
                     b.HasIndex("ProfileId");
 
@@ -476,7 +447,7 @@ namespace CareerPlatform.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -566,7 +537,7 @@ namespace CareerPlatform.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -650,15 +621,6 @@ namespace CareerPlatform.DataAccess.Migrations
                     b.Navigation("Profile");
                 });
 
-            modelBuilder.Entity("CareerPlatform.DataAccess.Entities.CV", b =>
-                {
-                    b.HasOne("CareerPlatform.DataAccess.Entities.ProfileImage", "ProfileImage")
-                        .WithMany()
-                        .HasForeignKey("ProfileImageId");
-
-                    b.Navigation("ProfileImage");
-                });
-
             modelBuilder.Entity("CareerPlatform.DataAccess.Entities.Company", b =>
                 {
                     b.HasOne("CareerPlatform.DataAccess.Entities.Address", "Address")
@@ -688,6 +650,15 @@ namespace CareerPlatform.DataAccess.Migrations
                     b.Navigation("Logo");
                 });
 
+            modelBuilder.Entity("CareerPlatform.DataAccess.Entities.CV", b =>
+                {
+                    b.HasOne("CareerPlatform.DataAccess.Entities.ProfileImage", "ProfileImage")
+                        .WithMany()
+                        .HasForeignKey("ProfileImageId");
+
+                    b.Navigation("ProfileImage");
+                });
+
             modelBuilder.Entity("CareerPlatform.DataAccess.Entities.JobExperience", b =>
                 {
                     b.HasOne("CareerPlatform.DataAccess.Entities.CV", null)
@@ -699,17 +670,6 @@ namespace CareerPlatform.DataAccess.Migrations
                         .HasForeignKey("CompanyId");
 
                     b.Navigation("Company");
-                });
-
-            modelBuilder.Entity("CareerPlatform.DataAccess.Entities.ResetPasswordEntry", b =>
-                {
-                    b.HasOne("CareerPlatform.DataAccess.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CareerPlatform.DataAccess.Entities.Review", b =>
@@ -740,9 +700,15 @@ namespace CareerPlatform.DataAccess.Migrations
 
             modelBuilder.Entity("CareerPlatform.DataAccess.Entities.User", b =>
                 {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
+                        .WithMany()
+                        .HasForeignKey("IdentityUserId");
+
                     b.HasOne("CareerPlatform.DataAccess.Entities.UserProfile", "Profile")
                         .WithMany()
                         .HasForeignKey("ProfileId");
+
+                    b.Navigation("IdentityUser");
 
                     b.Navigation("Profile");
                 });
@@ -826,14 +792,14 @@ namespace CareerPlatform.DataAccess.Migrations
                     b.Navigation("Responses");
                 });
 
-            modelBuilder.Entity("CareerPlatform.DataAccess.Entities.CV", b =>
-                {
-                    b.Navigation("JobExperience");
-                });
-
             modelBuilder.Entity("CareerPlatform.DataAccess.Entities.Company", b =>
                 {
                     b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("CareerPlatform.DataAccess.Entities.CV", b =>
+                {
+                    b.Navigation("JobExperience");
                 });
 #pragma warning restore 612, 618
         }

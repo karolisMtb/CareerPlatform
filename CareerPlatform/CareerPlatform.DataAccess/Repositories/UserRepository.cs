@@ -21,30 +21,8 @@ namespace CareerPlatform.DataAccess.Repositories
 
         public async Task AddAsync(User user)
         {
-            //user.Profile = new UserProfile()
-            //{
-            //    Name = "Petras",
-            //    LastName = "Petriukas",
-            //    DateOfBirth = new DateTime(1990, 8, 17),
-            //    PhoneNumber = "8659874",
-
-            //    Cv = new CV()
-            //    {
-            //        Name = "Petras",
-            //        LastName = "Petriukas",
-            //        PhoneNumber = "8659874",
-            //        City = "Vilnius"
-            //    },
-            //    Address = new Address()
-            //    {
-            //        Country = "Lithuania",
-            //        City = "kaunas",
-            //        Address1 = "Liepu g. 26",
-            //        ZipCode = 52545
-            //    }
-            //};
-            //await _platformDbContext.Users.AddAsync(user);
-            //await _unitOfWork.SaveChangesAsync();
+            await _platformDbContext.Users.AddAsync(user);
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task<bool> CheckIfUserExistsAsync(UserSignUpDto userDto)
@@ -92,7 +70,7 @@ namespace CareerPlatform.DataAccess.Repositories
             User user = await _platformDbContext.Users.Where(u => u.Id == userId).FirstAsync();
             if (user == null)
             {
-                throw new UserNotFoundException("User with your requested id is not found.");
+                throw new UserNotFoundException("User was not found.");
             }
 
             return user;
@@ -100,11 +78,11 @@ namespace CareerPlatform.DataAccess.Repositories
 
         public async Task<User> GetUserByLoginCredentialsAsync(string credential)
         {
-            User currentUser = await _platformDbContext.Users.Where(x => x.UserName == credential || x.Email == credential).FirstAsync();
+            User currentUser = await _platformDbContext.Users.Where(x => x.UserName.Equals(credential) || x.Email.Equals(credential)).FirstAsync();
 
             if (currentUser == null)
             {
-                throw new UserNotFoundException($"User with login '{credential}' was not found.");
+                throw new UserNotFoundException($"User with login '{credential}' credential was not found.");
             }
             return currentUser;
         }

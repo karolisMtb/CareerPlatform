@@ -9,5 +9,8 @@ namespace CareerPlatform.BusinessLogic.Interfaces
         //Task<IdentityUser> NewUserAsync(RegisterModel model);
         Task<LoginValidationDto> ValidateUserLoginAsync(IdentityUser user);
         Task<IdentityResult> RegisterUserAsync(RegisterModel model);
+        Task<bool> ValidateUserPasswordAsync(LoginModel model);
+        Task<IdentityResult> ResetPasswordAsync(IdentityUser user, string token, string password);
+        Task SendPasswordResetLinkAsync(IdentityUser user);
     }
 }

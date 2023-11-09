@@ -5,6 +5,7 @@ using JWTAuthentication.NET6._0.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -16,13 +17,16 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
         private readonly IConfiguration _configuration;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IUserService _userService;
+        private readonly IEmailSender _emailSender;
         public AuthenticateService(IConfiguration configuration, 
             UserManager<IdentityUser> userManager,
-            IUserService userService)
+            IUserService userService,
+            IEmailSender emailSender)
         {
             _configuration = configuration;
             _userManager = userManager;
             _userService = userService;
+            _emailSender = emailSender;
         }
 
         private async Task<List<Claim>> GetUserClaimsAsync(IdentityUser user)
@@ -90,16 +94,15 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
 
         public async Task<IdentityResult> RegisterUserAsync(RegisterModel model)
         {
-            var userByName = _userManager.FindByNameAsync(model.Username);
-            var userByEmail = _userManager.FindByEmailAsync(model.Email);
+            IdentityUser userByName = await _userManager.FindByNameAsync(model.Username);
+            IdentityUser userByEmail = await _userManager.FindByEmailAsync(model.Email);
 
-            if (userByName is not null || userByEmail is not null)
+            if (userByName is not null  || userByEmail is not null)
             {
                 throw new ExistingUserFoundException("User already exists with this credential. Try another one, please");
             }
 
             IdentityUser user = await NewUserAsync(model);
-
             var result = _userManager.CreateAsync(user, model.Password);
             var nonIdentityUserResult = await _userService.CreateNonIdentityUserAsync(user);
 
@@ -116,8 +119,41 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
                     }
                 );
             }
+            else
+            {
+                await _emailSender.ConfirmUserRegistrationAsync(user);
+
+                //send user registration confirmation email
+                //email linka paspaudzia
+                //request nueina i accountConfirmation endpoint
+                //_userManager setina emailConfirmation to 1
+            }
             
             return IdentityResult.Success;
+        }
+
+        public async Task<bool> ValidateUserPasswordAsync(LoginModel model)
+        {
+            bool validPassword = await _userManager.CheckPasswordAsync(await _userManager.FindByNameAsync(model.Username), model.Password);
+            
+            return validPassword;
+        }
+
+        public async Task<IdentityResult> ResetPasswordAsync(IdentityUser user, string token, string password)
+        {
+
+            IdentityResult result = await _userManager.ResetPasswordAsync(user, token, password);
+            if(!result.Succeeded)
+            {
+                throw new Exception("Error occured while resetting your password.");
+            }
+
+            return result;
+        }
+
+        public async Task SendPasswordResetLinkAsync(IdentityUser user)
+        {
+           await _emailSender.ResetPasswordAsync(user);           
         }
     }
 }

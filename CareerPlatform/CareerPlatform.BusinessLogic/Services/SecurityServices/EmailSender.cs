@@ -22,6 +22,16 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
             _userManager = userManager;
         }
 
+        public async Task ConfirmUserRegistrationAsync(IdentityUser user)
+        {
+            string baseUrl = _configuration["Application:BaseHost"];
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var encodedEmail = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(user.Email));
+            var callbackUrl = $"{baseUrl}/api/authenticate/confirm-registration?email={encodedEmail}&token={encodedToken}";
+            await SendEmailAsync(user.Email, "Registration confirmation", $"Please confirm your account registration by <a href='{callbackUrl}'>clicking here<a/>");
+        }
+
         public async Task ResetPasswordAsync(IdentityUser user)
         {
             string baseUrl = _configuration["Application:BaseHost"];

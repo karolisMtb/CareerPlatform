@@ -31,7 +31,6 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-//cia galimai del klaidos "method not found". Prideti validation prie endpointu
 builder.Services.AddIdentityCore<IdentityUser>(options =>
 {
     options.Password.RequireDigit = true;
@@ -52,7 +51,6 @@ builder.Services.AddSwaggerGen(options =>
         Title = "Career platform API"
     });
 
-    //comments on endpoint methods. Nerodo!!!
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 
@@ -84,6 +82,7 @@ builder.Services.AddSwaggerGen(options =>
             new List<string>()
         }
     });
+
 });
 
 
@@ -113,7 +112,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Swagger Configuration V1");
+    });
 }
 
 app.UseHttpsRedirection();

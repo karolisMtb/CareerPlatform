@@ -4,6 +4,8 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <DocumentationFile>C:\Users\Karolis\Desktop\CareerPlatform\CareerPlatform\CareerPlatform\bin\Debug\net6.0\CareerPlatform.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

@@ -2,6 +2,7 @@
 using CareerPlatform.DataAccess.Entities;
 using CareerPlatform.DataAccess.Interfaces;
 using CareerPlatform.Shared.ValueObjects.enums;
+using JWTAuthentication.NET6._0.Auth;
 using Microsoft.AspNetCore.Identity;
 using System.Reflection;
 
@@ -95,6 +96,16 @@ namespace CareerPlatform.BusinessLogic.Services.UserServices
             IdentityResult result = await _userRepository.DeleteUserAsync(user.Id);
 
             return result;
+        }
+
+        public async Task<IdentityUser> GetUserByEmailAsync(string email)
+        {
+            return await _userManager.FindByEmailAsync(email);
+        }
+
+        public async Task<IdentityUser> GetUserByNameAsync(LoginModel model)
+        {
+            return await _userManager.FindByNameAsync(model.Username);
         }
     }
 }

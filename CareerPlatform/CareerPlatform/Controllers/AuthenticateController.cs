@@ -13,7 +13,6 @@ namespace CareerPlatform.API.Controllers
     [ApiController]
     public class AuthenticateController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger<AuthenticateController> _logger;
         private readonly IEmailSender _emailSender;
         private readonly IPasswordReminderService _passwordReminderService;
@@ -21,14 +20,12 @@ namespace CareerPlatform.API.Controllers
         private readonly IAuthenticateService _authenticateService;
 
         public AuthenticateController(
-            UserManager<IdentityUser> userManager,
             ILogger<AuthenticateController> logger,
             IEmailSender emailSender,
             IUserService userService,
             IPasswordReminderService passwordReminderService,
             IAuthenticateService authenticateService)
         {
-            _userManager = userManager;
             _logger = logger;
             _emailSender = emailSender;
             _userService = userService;
@@ -55,12 +52,10 @@ namespace CareerPlatform.API.Controllers
         {
             try
             {
-                //kodo struktura kitaip galima parasyti. 
-                //userManager kelti i servisa visam application
-                IdentityUser user = await _userManager.FindByNameAsync(model.Username);
-                bool validPassword = await _userManager.CheckPasswordAsync(user, model.Password);
+                var user = await _userService.GetUserByNameAsync(model);
 
-                if (user is not null && validPassword is true)
+                if (user is not null 
+                    && await _authenticateService.ValidateUserPasswordAsync(model) is true)
                 {
                     LoginValidationDto token = await _authenticateService.ValidateUserLoginAsync(user);
 
@@ -74,10 +69,10 @@ namespace CareerPlatform.API.Controllers
                 _logger.LogError($"Client side error occured: {e.Message}");
                 return BadRequest($"Login was unsuccessfull. {e.Message}");
             }
-            catch (Exception e) //tai cia 400 status code? Tai kur 500?
+            catch (Exception e)
             {
                 _logger.LogError($"Server side error occured: {e.Message}");
-                return BadRequest("Server side error");
+                return StatusCode(500, "Server side error occured.");
             }
         }
 
@@ -118,7 +113,7 @@ namespace CareerPlatform.API.Controllers
             catch (Exception e)
             {
                 _logger.LogError($"Server side error occured: {e.Message}");
-                return BadRequest(e.Message);
+                return StatusCode(500, "Server side error occured.");
             }
         }
 
@@ -173,11 +168,10 @@ namespace CareerPlatform.API.Controllers
         {
             try
             {
-                IdentityUser user = await _userManager.FindByEmailAsync(request.Email);
-                    
+                IdentityUser user = await _userService.GetUserByEmailAsync(request.Email);
                 if (user is not null)
                 {
-                    await _emailSender.ResetPasswordAsync(user);
+                    await _authenticateService.SendPasswordResetLinkAsync(user);
                     return Accepted("Email for password recovery was sent successfully");
                 }
                 return BadRequest("Failed. Please try again.");
@@ -219,14 +213,14 @@ namespace CareerPlatform.API.Controllers
             }
             catch (ArgumentNullException e)
             {
-                _logger.LogError($"Server side error occured: {e.Message}");
+                _logger.LogError($"Could not process input: {e.Message}");
                 return NotFound(e.Message);
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
                 //return LocalRedirect(gal i password input form?); //pasidometi kur tas redirect nukreipia
-                return BadRequest(e.Message);
+                return StatusCode(500, "Server side error occured.");
             }            
         }
 
@@ -250,14 +244,19 @@ namespace CareerPlatform.API.Controllers
 
             try
             {
-                IdentityUser user = await _userManager.FindByEmailAsync(request.UserEmail);
+                IdentityUser user = await _userService.GetUserByEmailAsync(request.UserEmail);
 
                 if (user == null)
                 {
-                    return BadRequest($"User with this email {request.UserEmail} was not found");
+                    return BadRequest($"User with the email {user.Email} was not found");
                 }
 
-                IdentityResult result = await _userManager.ResetPasswordAsync(user, request.Token, request.Password);
+                if(request.Password == null)
+                {
+                    return BadRequest("Your must enter new password in order to reset it");
+                }
+
+                IdentityResult result = await _authenticateService.ResetPasswordAsync(user, request.Token, request.Password);
 
                 if (result.Succeeded)
                 {
@@ -289,7 +288,6 @@ namespace CareerPlatform.API.Controllers
         [Authorize]
         [HttpPatch]
         [Route("change-password")]
-        //is vending ar companyX rasti kaip gauti useri, kuris yra siuo metu prisilogines ir perduoti i si endpoint
         public async Task<IActionResult> ChangeUserPassword(
             string userEmail, 
             [FromBody] UserPasswordDto userPasswordDto)
@@ -315,6 +313,25 @@ namespace CareerPlatform.API.Controllers
                 _logger.LogError(e.Message);
                 return BadRequest(e.Message);
             }
+        }
+        
+        /// <summary>
+        /// Validates account registration confirmation from email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("confirm-registration")]
+        public async Task<IActionResult> ConfirmUserRegistration(string email, string token)
+        {
+            if(string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+            {
+                return BadRequest("Wrong confirmation");
+            }
+
+
+            return Ok("Account registration confirmation has been successfully sent.");
         }
     }
 }
