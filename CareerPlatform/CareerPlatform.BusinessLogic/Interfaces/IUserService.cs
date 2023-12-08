@@ -7,18 +7,10 @@ namespace CareerPlatform.BusinessLogic.Interfaces
 {
     public interface IUserService
     {
-        //Task<User> SignUpNewUserAsync(UserSignUpDto userdto);
-        //Task<User> GetUserByIdAsync(Guid userId);
-        //Task<string> AuthenticateUserAsync(UserLoginDto loginDto);
-        //Task<IdentityResult> DeleteUserAsync(string email);
-
-        Task<IdentityResult> DeleteIdentityUserAsync(string email);
-        Task<IdentityResult> DeleteNonIdentityUserAsync(string email);
-        Task<User> GetByEmailAddressAsync(string email);
-        Task<IdentityResult> CreateNonIdentityUserAsync(IdentityUser user);
+        Task<User> GetUserByNameAsync(LoginModel model);
+        Task<User> GetUserByEmailAddressAsync(string email);
+        Task<IdentityResult> DeleteUserByEmailAsync(string email, string password);
         Task<IdentityResult> ChangeUserPasswordAsync(string email, string oldPassword, string newPassword);
-
-        Task<IdentityUser> GetUserByNameAsync(LoginModel model);
-        Task<IdentityUser> GetUserByEmailAsync(string email);
+        Task<IdentityResult> ConfirmUserRegistrationAsync(User user, string token);
     }
 }

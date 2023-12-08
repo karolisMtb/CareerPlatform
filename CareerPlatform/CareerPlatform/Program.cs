@@ -2,6 +2,7 @@ using CareerPlatform.BusinessLogic.Interfaces;
 using CareerPlatform.BusinessLogic.Services.SecurityServices;
 using CareerPlatform.BusinessLogic.Services.UserServices;
 using CareerPlatform.DataAccess.DatabaseContext;
+using CareerPlatform.DataAccess.Entities;
 using CareerPlatform.DataAccess.Interfaces;
 using CareerPlatform.DataAccess.Repositories;
 using CareerPlatform.DataAccess.UnitOfWork;
@@ -22,16 +23,16 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IPasswordReminderService, PasswordReminderService>();
-builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddTransient<IAuthenticateService, AuthenticateService>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("ConnStr")), ServiceLifetime.Scoped);
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddIdentityCore<IdentityUser>(options =>
+builder.Services.AddIdentityCore<User>(options =>
 {
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 8;

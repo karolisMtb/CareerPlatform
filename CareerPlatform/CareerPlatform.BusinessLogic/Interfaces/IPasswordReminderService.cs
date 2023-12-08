@@ -1,6 +1,4 @@
-﻿using CareerPlatform.DataAccess.Entities;
-
-namespace CareerPlatform.BusinessLogic.Interfaces
+﻿namespace CareerPlatform.BusinessLogic.Interfaces
 {
     public interface IPasswordReminderService
     {

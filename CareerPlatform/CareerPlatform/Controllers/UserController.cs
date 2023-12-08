@@ -1,7 +1,8 @@
 ﻿using CareerPlatform.BusinessLogic.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+using CareerPlatform.DataAccess.Models;
+using CareerPlatform.Shared.Exceptions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CareerPlatform.API.Controllers
 {
@@ -13,43 +14,48 @@ namespace CareerPlatform.API.Controllers
         private readonly ILogger<UserController> _logger;
 
         public UserController(
-            IUserService userService, 
+            IUserService userService,
             ILogger<UserController> logger)
         {
             _userService = userService;
             _logger = logger;
         }
 
-        //delete user
         /// <summary>
-        /// Deletes user from database
+        /// Deletes logged in user from database
         /// </summary>
         /// <response code="200">Success</response>
         /// <response code="204">No content</response>
         /// <response code="400">Bad request</response>
+        /// <response code="401">Unauthorized</response>
         /// <response code="500">Server side error</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         //[Authorize]
         [HttpDelete]
-        public async Task<IActionResult> DeleteUser(string email)
+        public async Task<IActionResult> DeleteUser([FromBody]DeleteModel deleteModel)
         {
             try
             {
-                if(!(email is null) || !(email == string.Empty))
+                if(!string.IsNullOrEmpty(deleteModel.Email) && !string.IsNullOrEmpty(deleteModel.Password))
                 {
-                    IdentityResult identityResult = await _userService.DeleteIdentityUserAsync(email);
-                    IdentityResult result = await _userService.DeleteNonIdentityUserAsync(email);
+                    var result = await _userService.DeleteUserByEmailAsync(deleteModel.Email, deleteModel.Password);
 
-                    if(!identityResult.Succeeded || !result.Succeeded)
+                    if (!result.Succeeded)
                     {
                         return BadRequest("User could not be deleted. Please try again");
                     }
 
-                    return Ok("User deleted successfully"); //turetu buti redirect to home page? Issiaiskinti
+                    return Ok("User deleted successfully");
                 }
+            }
+            catch(UserNotFoundException e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
             }
             catch (ArgumentNullException e)
             {
@@ -64,8 +70,6 @@ namespace CareerPlatform.API.Controllers
 
             return NoContent();
         }
-
-
         //delete profile
         //delete Cv
         //delete address

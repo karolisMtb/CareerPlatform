@@ -300,8 +300,8 @@ namespace CareerPlatform.DataAccess.Migrations
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -330,44 +330,6 @@ namespace CareerPlatform.DataAccess.Migrations
                     b.HasIndex("BusinessProfileId");
 
                     b.ToTable("ReviewResponses");
-                });
-
-            modelBuilder.Entity("CareerPlatform.DataAccess.Entities.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DisabledAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IdentityUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<Guid?>("ProfileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdentityUserId");
-
-                    b.HasIndex("ProfileId");
-
-                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("CareerPlatform.DataAccess.Entities.UserProfile", b =>
@@ -478,6 +440,10 @@ namespace CareerPlatform.DataAccess.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -529,6 +495,8 @@ namespace CareerPlatform.DataAccess.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -612,6 +580,24 @@ namespace CareerPlatform.DataAccess.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("CareerPlatform.DataAccess.Entities.User", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DisabledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasIndex("ProfileId");
+
+                    b.HasDiscriminator().HasValue("User");
+                });
+
             modelBuilder.Entity("CareerPlatform.DataAccess.Entities.BusinessUser", b =>
                 {
                     b.HasOne("CareerPlatform.DataAccess.Entities.BusinessProfile", "Profile")
@@ -682,9 +668,7 @@ namespace CareerPlatform.DataAccess.Migrations
 
                     b.HasOne("CareerPlatform.DataAccess.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Company");
 
@@ -696,21 +680,6 @@ namespace CareerPlatform.DataAccess.Migrations
                     b.HasOne("CareerPlatform.DataAccess.Entities.BusinessProfile", null)
                         .WithMany("Responses")
                         .HasForeignKey("BusinessProfileId");
-                });
-
-            modelBuilder.Entity("CareerPlatform.DataAccess.Entities.User", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
-                        .WithMany()
-                        .HasForeignKey("IdentityUserId");
-
-                    b.HasOne("CareerPlatform.DataAccess.Entities.UserProfile", "Profile")
-                        .WithMany()
-                        .HasForeignKey("ProfileId");
-
-                    b.Navigation("IdentityUser");
-
-                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("CareerPlatform.DataAccess.Entities.UserProfile", b =>
@@ -783,6 +752,15 @@ namespace CareerPlatform.DataAccess.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CareerPlatform.DataAccess.Entities.User", b =>
+                {
+                    b.HasOne("CareerPlatform.DataAccess.Entities.UserProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId");
+
+                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("CareerPlatform.DataAccess.Entities.BusinessProfile", b =>

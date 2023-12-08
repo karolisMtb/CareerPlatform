@@ -1,48 +1,52 @@
 ﻿using CareerPlatform.BusinessLogic.Interfaces;
 using CareerPlatform.DataAccess.Entities;
 using CareerPlatform.DataAccess.Interfaces;
-using CareerPlatform.Shared.ValueObjects.enums;
+using CareerPlatform.Shared.Exceptions;
 using JWTAuthentication.NET6._0.Auth;
 using Microsoft.AspNetCore.Identity;
 using System.Reflection;
+using System.Security.Claims;
 
 namespace CareerPlatform.BusinessLogic.Services.UserServices
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepository;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<User> _userManager;
 
         //prideti fluentvalidator
+        //prideti loginima
 
-        public UserService(
-            IUserRepository userRepository,
-            UserManager<IdentityUser> userManager)
+        public UserService(UserManager<User> userManager)
         {
-            _userRepository = userRepository;
             _userManager = userManager;
         }
 
-        public async Task<IdentityResult> CreateNonIdentityUserAsync(IdentityUser user)
-        {
-            if(user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+        //public async Task<IdentityResult> CreateNonIdentityUserAsync(User user)
+        //{
+        //    if(user == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(user));
+        //    }
 
-            User newNonIdentityuser = new User(user);
+        //    User newNonIdentityuser = new User();
 
-            if(newNonIdentityuser is not null)
-            {
-                await _userRepository.AddAsync(newNonIdentityuser);
-                return IdentityResult.Success;
-            }
+        //    if (newNonIdentityuser is not null)
+        //    {
+        //        await _userRepository.AddAsync(newNonIdentityuser);
+        //        return IdentityResult.Success;
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
+
         public async Task<IdentityResult> ChangeUserPasswordAsync(string email, string oldPassword, string newPassword)
         {
-            IdentityUser user = await _userManager.FindByEmailAsync(email);
+            User user = await _userManager.FindByEmailAsync(email);
+
+            if(user is null)
+            {
+                throw new UserNotFoundException("User could not be found.");
+            }
 
             IdentityResult result = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
 
@@ -50,39 +54,50 @@ namespace CareerPlatform.BusinessLogic.Services.UserServices
             {
                 throw new TargetInvocationException("Failed to change password. Please try again", new Exception());
             }
+
             return result;
         }
 
-
-        //public async Task<User> GetUserByIdAsync(Guid userId)
-        //{
-        //    if (userId == Guid.Empty)
-        //    {
-        //        throw new ArgumentNullException("Please specify the user you are looking for.");
-        //    }
-
-        //    return await _userRepository.GetUserByIdAsync(userId);
-        //}
-
-        public async Task<User> GetByEmailAddressAsync(string email)
+        public async Task<User> GetUserByEmailAddressAsync(string email)
         {
-            if (!(email is null) || email != string.Empty)
+            if (string.IsNullOrEmpty(email))
             {
-                var user = await _userRepository.GetByEmailAddressAsync(email);
-                return user;
+                throw new ArgumentNullException("Wrong data values being passed. Please check and try again");
             }
 
-            return null;
+            User user = await _userManager.FindByEmailAsync(email);
+
+            if(user is null)
+            {
+                throw new UserNotFoundException("User could not be found.");
+            }
+ 
+            return user;
         }
 
-        public async Task<IdentityResult> DeleteIdentityUserAsync(string email)
+        private async Task<IdentityResult> DeleteIdentityUserAsync(string email)
         {
-            IdentityUser user = await _userManager.FindByEmailAsync(email);
+            User user = await _userManager.FindByEmailAsync(email);
+            if (user is null)
+            {
+                throw new UserNotFoundException("User could not be found.");
+            }
 
-            IdentityResult roleResult = await _userManager.RemoveFromRoleAsync(user, Roles.User.ToString());
+            IEnumerable<Claim> claims = await _userManager.GetClaimsAsync(user);
+            if (claims.Any())
+            {
+                await _userManager.RemoveClaimsAsync(user, claims);
+            }
+
+            IList<string> roles = await _userManager.GetRolesAsync(user);
+            if (roles.Any())
+            {
+                await _userManager.RemoveFromRolesAsync(user, roles);
+            }
+
             IdentityResult deleteResult = await _userManager.DeleteAsync(user);
-            
-            if(roleResult.Succeeded && deleteResult.Succeeded)
+
+            if(deleteResult.Succeeded)
             {
                 return IdentityResult.Success;
             }
@@ -90,22 +105,61 @@ namespace CareerPlatform.BusinessLogic.Services.UserServices
             return IdentityResult.Failed();
         }
 
-        public async Task<IdentityResult> DeleteNonIdentityUserAsync(string email)
+        public async Task<IdentityResult> DeleteUserByEmailAsync(string email, string password)
         {
-            User user = await _userRepository.GetUserByLoginCredentialsAsync(email);
-            IdentityResult result = await _userRepository.DeleteUserAsync(user.Id);
+            User user = await _userManager.FindByEmailAsync(email);
 
-            return result;
+            if(user is null)
+            {
+                throw new UserNotFoundException("Check your credencials. There might have an error occured.");
+            }
+
+            bool validatedUser = await _userManager.CheckPasswordAsync(user, password);
+
+            if (validatedUser is true)
+            {
+                IdentityResult result = await DeleteIdentityUserAsync(email);
+           
+                if(result is null || !result.Succeeded)
+                {
+                    throw new InvalidOperationException("Unable to delete user. Something went wrong.");
+                }
+                
+                return result;
+            }
+
+            return IdentityResult.Failed(
+                new IdentityError()
+                {
+                    Description = "Failed to delete user. Check you password, please"
+                },
+                new IdentityError()
+                {
+                    Description = "Server side error"
+                }
+            );
         }
 
-        public async Task<IdentityUser> GetUserByEmailAsync(string email)
+        public async Task<User> GetUserByNameAsync(LoginModel model)
         {
-            return await _userManager.FindByEmailAsync(email);
+            User user = await _userManager.FindByNameAsync(model.Username);
+
+            if(user is null)
+            {
+                throw new UserNotFoundException("User could not be found");
+            }
+
+            return user;
         }
 
-        public async Task<IdentityUser> GetUserByNameAsync(LoginModel model)
+        public async Task<IdentityResult> ConfirmUserRegistrationAsync(User user, string token)
         {
-            return await _userManager.FindByNameAsync(model.Username);
+            if(user is null || token.Equals(String.Empty) || token is null)
+            {
+                throw new ArgumentNullException("Registration could no be confirmed");
+            }
+
+            return await _userManager.ConfirmEmailAsync(user, token);
         }
     }
 }

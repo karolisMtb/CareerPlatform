@@ -4,7 +4,7 @@ public class ResetPasswordRequestDto
 {
     public string UserEmail { get; private set; }
     public string Token { get; private set; }
-    public string? Password { get; private set; } //kodel ne private? kodel private? Kaip jis setinamas?
+    public string? Password { get; private set; }
 
     public ResetPasswordRequestDto(string email, string token, string password)
     {
