@@ -158,8 +158,8 @@ namespace CareerPlatform.API.Controllers
         /// <summary>
         /// Initiates password reset service
         /// </summary>
-        /// <response code="202">Accepted</response>> 
-        /// <response code="400">Bad request</response>> 
+        /// <response code="202">Accepted</response>
+        /// <response code="400">Bad request</response>
         /// <response code="500">Server side error</response>
         [ProducesResponseType(StatusCodes.Status202Accepted)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -195,8 +195,9 @@ namespace CareerPlatform.API.Controllers
         /// <summary>
         /// Validates password reset request params
         /// </summary>
-        /// <response code="200">Success</response>> 
-        /// <response code="400">Bad request</response>> 
+        /// <response code="200">Success</response>
+        /// <response code="400">Bad request</response>
+        /// <response code="500">Server side error</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpGet]
@@ -240,8 +241,8 @@ namespace CareerPlatform.API.Controllers
         /// <summary>
         /// Resets password from form
         /// </summary>
-        /// <response code="202">Accepted</response>> 
-        /// <response code="400">Bad request</response>> 
+        /// <response code="202">Accepted</response>
+        /// <response code="400">Bad request</response>
         /// <response code="500">Server side error</response>
         [ProducesResponseType(StatusCodes.Status202Accepted)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -380,6 +381,44 @@ namespace CareerPlatform.API.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+
+
+
+        //[HttpGet]
+        //[Route("test")]
+        //public async Task<IActionResult> SendEmail()
+        //{
+        //    try
+        //    {
+        //        await _authenticateService.SendGridTest();
+        //    }
+        //    catch (NullReferenceException e)
+        //    {
+        //        _logger.LogError(e.Message);
+        //        return NotFound();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        _logger.LogError(e.Message);
+        //        return BadRequest(e.Message);
+        //    }
+
+
+        //    //var apiKey = "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";
+        //    //var client = new SendGridClient(apiKey);
+        //    //var from = new EmailAddress("karolis.mtb@gmail.com", "Testing shit");
+        //    //var subject = "Send grid test subject";
+        //    //var to = new EmailAddress("karolis.mtb@gmail.com", "Example User");
+        //    //var plainTextContent = "Testing email service 1";
+        //    //var htmlContent = "Please confirm your account registration by <a href='{callbackUrl}'>clicking here<a/>";
+        //    //var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+        //    //var response = await client.SendEmailAsync(msg);
+        //    //Console.WriteLine(response.StatusCode);
+        //    //Console.WriteLine(response.Body.ReadAsStringAsync());
+
+        //    return Ok();
+        //}
 
     }
 }

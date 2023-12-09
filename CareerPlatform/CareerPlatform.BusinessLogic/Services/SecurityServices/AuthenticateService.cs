@@ -5,8 +5,8 @@ using CareerPlatform.Shared.Exceptions;
 using JWTAuthentication.NET6._0.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -18,13 +18,16 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
         private readonly IConfiguration _configuration;
         private readonly UserManager<User> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly ILogger<AuthenticateService> _logger;
         public AuthenticateService(IConfiguration configuration, 
             UserManager<User> userManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            ILogger<AuthenticateService> logger)
         {
             _configuration = configuration;
             _userManager = userManager;
             _emailSender = emailSender;
+            _logger = logger;
         }
 
         //add logger
@@ -99,6 +102,7 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
 
             if (userByName is not null  || userByEmail is not null)
             {
+                _logger.LogError("User already exists with the email or username");
                 throw new ExistingUserFoundException("User already exists with this credential. Try another one, please");
             }
 
@@ -129,14 +133,22 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
         public async Task<bool> ValidateUserPasswordAsync(LoginModel model)
         {
             var user = await _userManager.FindByNameAsync(model.Username);
+
             if(user is null)
             {
+                _logger.LogError("Either password or username is wrong.");
                 throw new UserNotFoundException("Either wrong input or user is not registered.");
             }
 
             bool validPassword = await _userManager.CheckPasswordAsync(user, model.Password);
             
-            return validPassword;
+            if(validPassword is false)
+            {
+                _logger.LogError("Failed to validate user's password.");
+                throw new InvalidOperationException("Password validation was not successfull");
+            }
+
+            return false;
         }
 
         public async Task<IdentityResult> ResetPasswordAsync(User user, string token, string password)
@@ -145,6 +157,7 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
 
             if(!result.Succeeded)
             {
+                _logger.LogError("Error occured while resetting user's password.");
                 throw new Exception("Error occured while resetting your password.");
             }
 
@@ -155,6 +168,7 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
         {
             if(user is null)
             {
+                _logger.LogError("No user is given to send reset link to.");
                 throw new ArgumentNullException("Error occured while sending reset password link.");
             }
 
@@ -174,7 +188,8 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
 
             if(string.IsNullOrEmpty(decryptedEmail))
             {
-                throw new ArgumentNullException("Email could not be revealed");
+                _logger.LogError("Email could not be revealed.");
+                throw new ArgumentNullException("Email could not be revealed.");
             }
 
             return decryptedEmail;
@@ -185,7 +200,8 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
             string decryptedToken = await DecryptAsync(token);
             if (string.IsNullOrEmpty(decryptedToken))
             {
-                throw new ArgumentNullException("Email could not be revealed");
+                _logger.LogError("Token could not be revealed.");
+                throw new ArgumentNullException("Confirmation information could not be revealed.");
             }
 
             return decryptedToken;
