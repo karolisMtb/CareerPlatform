@@ -1,9 +1,9 @@
 ﻿using CareerPlatform.BusinessLogic.Interfaces;
 using CareerPlatform.DataAccess.Entities;
-using CareerPlatform.DataAccess.Interfaces;
 using CareerPlatform.Shared.Exceptions;
 using JWTAuthentication.NET6._0.Auth;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Security.Claims;
 
@@ -12,32 +12,16 @@ namespace CareerPlatform.BusinessLogic.Services.UserServices
     public class UserService : IUserService
     {
         private readonly UserManager<User> _userManager;
+        private readonly ILogger<User> _logger;
 
-        //prideti fluentvalidator
-        //prideti loginima
+        //TODO
+        //add fluent validator
 
-        public UserService(UserManager<User> userManager)
+        public UserService(UserManager<User> userManager, ILogger<User> logger)
         {
             _userManager = userManager;
+            _logger = logger;
         }
-
-        //public async Task<IdentityResult> CreateNonIdentityUserAsync(User user)
-        //{
-        //    if(user == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(user));
-        //    }
-
-        //    User newNonIdentityuser = new User();
-
-        //    if (newNonIdentityuser is not null)
-        //    {
-        //        await _userRepository.AddAsync(newNonIdentityuser);
-        //        return IdentityResult.Success;
-        //    }
-
-        //    return null;
-        //}
 
         public async Task<IdentityResult> ChangeUserPasswordAsync(string email, string oldPassword, string newPassword)
         {
@@ -45,6 +29,7 @@ namespace CareerPlatform.BusinessLogic.Services.UserServices
 
             if(user is null)
             {
+                _logger.LogError("User could not be found with given email.");
                 throw new UserNotFoundException("User could not be found.");
             }
 
@@ -52,6 +37,7 @@ namespace CareerPlatform.BusinessLogic.Services.UserServices
 
             if(!result.Succeeded)
             {
+                _logger.LogError("User could not be found with given email."); //
                 throw new TargetInvocationException("Failed to change password. Please try again", new Exception());
             }
 

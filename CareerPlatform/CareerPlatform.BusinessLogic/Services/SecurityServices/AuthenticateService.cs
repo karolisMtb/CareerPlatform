@@ -175,13 +175,6 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
            await _emailSender.ResetPasswordAsync(user);           
         }
 
-        public async Task SendGridTest()
-        {
-            var user = await _userManager.FindByEmailAsync("karolis.mtb@gmail.com");
-
-            await _emailSender.ConfirmUserRegistrationAsync(user);
-        }
-
         public async Task<string> DecryptConfirmationEmailAsync(string email)
         {
             string decryptedEmail = await DecryptAsync(email);

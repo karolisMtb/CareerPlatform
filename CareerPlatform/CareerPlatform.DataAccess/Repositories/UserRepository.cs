@@ -1,5 +1,7 @@
 ﻿using CareerPlatform.DataAccess.DatabaseContext;
+using CareerPlatform.DataAccess.Entities;
 using CareerPlatform.DataAccess.Interfaces;
+using Microsoft.AspNetCore.Identity;
 
 namespace CareerPlatform.DataAccess.Repositories
 {
@@ -7,11 +9,13 @@ namespace CareerPlatform.DataAccess.Repositories
     {
         private readonly ApplicationDbContext _platformDbContext;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<User> _userManager;
 
-        public UserRepository(ApplicationDbContext platformDbContext, IUnitOfWork unitOfWork)
+        public UserRepository(ApplicationDbContext platformDbContext, IUnitOfWork unitOfWork, UserManager<User> userManager)
         {
             _platformDbContext = platformDbContext;
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
         }
 
         //public async Task AddAsync(User user)

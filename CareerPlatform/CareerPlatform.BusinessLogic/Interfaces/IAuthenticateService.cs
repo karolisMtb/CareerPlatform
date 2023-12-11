@@ -14,8 +14,5 @@ namespace CareerPlatform.BusinessLogic.Interfaces
         Task SendPasswordResetLinkAsync(User user);
         Task<string> DecryptConfirmationEmailAsync(string email);
         Task<string> DecryptConfirmationTokenAsync(string token);
-
-
-        Task SendGridTest();
     }
 }

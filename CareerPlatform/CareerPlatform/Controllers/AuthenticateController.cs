@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
+using System.Security.Claims;
 
 namespace CareerPlatform.API.Controllers
 {
@@ -30,55 +31,7 @@ namespace CareerPlatform.API.Controllers
             _passwordReminderService = passwordReminderService;
             _authenticateService = authenticateService;
         }
-
-        /// <summary>
-        /// Logs in existing user
-        /// </summary>
-        /// <response code="200">Success</response>
-        /// <response code="400">Bad request</response>
-        /// <response code="401">Unauthorized</response>
-        /// <response code="404">No found</response>
-        /// <response code="500">Server side error</response>
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [HttpPost]
-        [Route("login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel model)
-        {
-            try
-            {
-                User user = await _userService.GetUserByNameAsync(model);
-                bool valid = await _authenticateService.ValidateUserPasswordAsync(model);
-
-                if (user is not null && valid is true)
-                {
-                    LoginValidationDto token = await _authenticateService.ValidateUserLoginAsync(user);
-
-                    return Ok(token);
-                }
-
-                return Unauthorized("Login was unsuccessfull. Focus, dude!");
-            }
-            catch (UserNotFoundException e)
-            {
-                _logger.LogError($"User was not found. Check and try again: {e.Message}");
-                return BadRequest($"User was not found. Check and try again: {e.Message}");
-            }
-            catch (ArgumentNullException e)
-            {
-                _logger.LogError($"Login was unsuccessfull: {e.Message}");
-                return BadRequest($"Login was unsuccessfull: {e.Message}");
-            }
-            catch (Exception e)
-            {
-                _logger.LogError($"Server side error occured: {e.Message}");
-                return StatusCode(500, $"Server side error occured: {e.Message}");
-            }
-        }
-
+      
         /// <summary>
         /// Registers new user
         /// </summary>
@@ -120,6 +73,55 @@ namespace CareerPlatform.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Logs in existing user
+        /// </summary>
+        /// <response code="200">Success</response>
+        /// <response code="400">Bad request</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="404">No found</response>
+        /// <response code="500">Server side error</response>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
+        {
+            try
+            {
+                User user = await _userService.GetUserByNameAsync(model);
+                bool valid = await _authenticateService.ValidateUserPasswordAsync(model);
+
+
+                if (user is not null && valid is true)
+                {
+                    LoginValidationDto token = await _authenticateService.ValidateUserLoginAsync(user);
+
+                    return Ok(token);
+                }
+
+                return Unauthorized("Login was unsuccessfull. Focus, dude!");
+            }
+            catch (UserNotFoundException e)
+            {
+                _logger.LogError($"User was not found. Check and try again: {e.Message}");
+                return BadRequest($"User was not found. Check and try again: {e.Message}");
+            }
+            catch (ArgumentNullException e)
+            {
+                _logger.LogError($"Login was unsuccessfull: {e.Message}");
+                return BadRequest($"Login was unsuccessfull: {e.Message}");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Server side error occured: {e.Message}");
+                return StatusCode(500, $"Server side error occured: {e.Message}");
+            }
+        }
+
         //[HttpPost]
         //[Route("register-admin")]
         //public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
@@ -153,7 +155,6 @@ namespace CareerPlatform.API.Controllers
         //    }
         //    return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         //}
-
 
         /// <summary>
         /// Initiates password reset service
@@ -383,42 +384,20 @@ namespace CareerPlatform.API.Controllers
         }
 
 
-
-
-        //[HttpGet]
-        //[Route("test")]
-        //public async Task<IActionResult> SendEmail()
-        //{
-        //    try
-        //    {
-        //        await _authenticateService.SendGridTest();
-        //    }
-        //    catch (NullReferenceException e)
-        //    {
-        //        _logger.LogError(e.Message);
-        //        return NotFound();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        _logger.LogError(e.Message);
-        //        return BadRequest(e.Message);
-        //    }
-
-
-        //    //var apiKey = "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";
-        //    //var client = new SendGridClient(apiKey);
-        //    //var from = new EmailAddress("karolis.mtb@gmail.com", "Testing shit");
-        //    //var subject = "Send grid test subject";
-        //    //var to = new EmailAddress("karolis.mtb@gmail.com", "Example User");
-        //    //var plainTextContent = "Testing email service 1";
-        //    //var htmlContent = "Please confirm your account registration by <a href='{callbackUrl}'>clicking here<a/>";
-        //    //var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
-        //    //var response = await client.SendEmailAsync(msg);
-        //    //Console.WriteLine(response.StatusCode);
-        //    //Console.WriteLine(response.Body.ReadAsStringAsync());
-
-        //    return Ok();
-        //}
-
+        private async Task<User> GetCurrentUser()
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            
+            if (identity != null)
+            {
+                var userClaims = identity.Claims;
+                return new User
+                {
+                    UserName = userClaims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value,
+                    //Role = userClaims.FirstOrDefault(x => x.Type == ClaimTypes.Role)?.Value
+                };
+            }
+            return null;
+        }
     }
 }

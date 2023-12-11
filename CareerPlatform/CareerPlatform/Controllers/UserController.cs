@@ -34,7 +34,7 @@ namespace CareerPlatform.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        //[Authorize]
+        [Authorize]
         [HttpDelete]
         public async Task<IActionResult> DeleteUser([FromBody]DeleteModel deleteModel)
         {
@@ -115,9 +115,5 @@ namespace CareerPlatform.API.Controllers
         //{
 
         //}
-
-
-
-        //forgot password https://medium.com/@m.anilkarasah/reset-password-implementation-inside-net-core-web-api-9559dac1d2db
     }
 }
