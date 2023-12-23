@@ -6,6 +6,9 @@ using CareerPlatform.DataAccess.Entities;
 using CareerPlatform.DataAccess.Interfaces;
 using CareerPlatform.DataAccess.Repositories;
 using CareerPlatform.DataAccess.UnitOfWork;
+using CareerPlatform.DataAccess.Validators;
+using FluentValidation;
+using JWTAuthentication.NET6._0.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +28,11 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IPasswordReminderService, PasswordReminderService>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddTransient<IAuthenticateService, AuthenticateService>();
+builder.Services.AddScoped<IValidator<User>, UserValidator>();
+builder.Services.AddScoped<IValidator<UserProfile>, ProfileValidator>();
+builder.Services.AddScoped<IValidator<Address>, AddressValidator>();
+builder.Services.AddScoped<IValidator<LoginModel>, LoginValidator>();
+builder.Services.AddScoped<IValidator<RegisterModel>, RegisterValidator>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("ConnStr")), ServiceLifetime.Scoped);
 

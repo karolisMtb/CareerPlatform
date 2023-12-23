@@ -3,15 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CareerPlatform.DataAccess.Attributes
 {
-    public class AllowedExtensionsAttribute : ValidationAttribute
+    public class AllowedExtensionsAttribute(string[] _allowedExtensions) : ValidationAttribute
     {
-        private readonly string[] _allowedExtensions;
-
-        public AllowedExtensionsAttribute(string[] allowedExtensions)
-        {
-            _allowedExtensions = allowedExtensions;
-        }
-
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
             if (value is IFormFile file)

@@ -2,6 +2,7 @@
 using CareerPlatform.DataAccess.DTOs;
 using CareerPlatform.DataAccess.Entities;
 using CareerPlatform.Shared.Exceptions;
+using FluentValidation;
 using JWTAuthentication.NET6._0.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -13,24 +14,12 @@ using System.Text;
 
 namespace CareerPlatform.BusinessLogic.Services.SecurityServices
 {
-    public class AuthenticateService : IAuthenticateService
+    public class AuthenticateService(IConfiguration _configuration,
+            UserManager<User> _userManager,
+            IEmailSender _emailSender,
+            ILogger<AuthenticateService> _logger,
+            IValidator<User> _userValidator) : IAuthenticateService
     {
-        private readonly IConfiguration _configuration;
-        private readonly UserManager<User> _userManager;
-        private readonly IEmailSender _emailSender;
-        private readonly ILogger<AuthenticateService> _logger;
-        public AuthenticateService(IConfiguration configuration, 
-            UserManager<User> userManager,
-            IEmailSender emailSender,
-            ILogger<AuthenticateService> logger)
-        {
-            _configuration = configuration;
-            _userManager = userManager;
-            _emailSender = emailSender;
-            _logger = logger;
-        }
-
-        //add logger
 
         private async Task<List<Claim>> GetUserClaimsAsync(User user)
         {
@@ -103,7 +92,7 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
             if (userByName is not null  || userByEmail is not null)
             {
                 _logger.LogError("User already exists with the email or username");
-                throw new ExistingUserFoundException("User already exists with this credential. Try another one, please");
+                throw new ExistingUserFoundException("User already exists with this credential. Try different email or username");
             }
 
             User user = await NewUserAsync(model);

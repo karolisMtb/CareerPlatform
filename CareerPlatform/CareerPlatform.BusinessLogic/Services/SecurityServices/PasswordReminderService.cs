@@ -7,14 +7,8 @@ using CareerPlatform.DataAccess.Entities;
 
 namespace CareerPlatform.BusinessLogic.Services.SecurityServices
 {
-    public sealed class PasswordReminderService : IPasswordReminderService
+    public sealed class PasswordReminderService(UserManager<User> _userManager) : IPasswordReminderService
     {
-        private readonly UserManager<User> _userManager;
-        public PasswordReminderService(UserManager<User> userManager)
-        {
-            _userManager = userManager;
-        }
-
         public async Task<bool> ValidatePasswordResetRequestAsync(string email, string token)
         {
             var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));

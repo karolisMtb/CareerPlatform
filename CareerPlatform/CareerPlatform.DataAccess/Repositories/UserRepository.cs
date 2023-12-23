@@ -5,18 +5,8 @@ using Microsoft.AspNetCore.Identity;
 
 namespace CareerPlatform.DataAccess.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository(ApplicationDbContext _platformDbContext, IUnitOfWork _unitOfWork, UserManager<User> _userManager) : IUserRepository
     {
-        private readonly ApplicationDbContext _platformDbContext;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly UserManager<User> _userManager;
-
-        public UserRepository(ApplicationDbContext platformDbContext, IUnitOfWork unitOfWork, UserManager<User> userManager)
-        {
-            _platformDbContext = platformDbContext;
-            _unitOfWork = unitOfWork;
-            _userManager = userManager;
-        }
 
         //public async Task AddAsync(User user)
         //{
@@ -43,7 +33,7 @@ namespace CareerPlatform.DataAccess.Repositories
         //            _platformDbContext.RemoveRange(userToDelete.Profile.Address);
         //            _platformDbContext.RemoveRange(userToDelete.Profile);
         //        }
-
+        //        trinant user turi istrinti automatiskai viska. Visas dependencies. Virtual. Pataisyti
         //        _platformDbContext.RemoveRange(userToDelete);
         //    }
 

@@ -3,15 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CareerPlatform.DataAccess.Attributes
 {
-    public class MaxFileSizeAttribute : ValidationAttribute
+    public class MaxFileSizeAttribute(int _maxFileSize) : ValidationAttribute
     {
-        private readonly int _maxFileSize;
-
-        public MaxFileSizeAttribute(int maxFileSize)
-        {
-            _maxFileSize = maxFileSize;
-        }
-
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
             if (value is IFormFile file)

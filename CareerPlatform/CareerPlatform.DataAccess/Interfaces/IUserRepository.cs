@@ -1,5 +1,4 @@
-﻿using CareerPlatform.DataAccess.DTOs;
-namespace CareerPlatform.DataAccess.Interfaces
+﻿namespace CareerPlatform.DataAccess.Interfaces
 {
     public interface IUserRepository
     {

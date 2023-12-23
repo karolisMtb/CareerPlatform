@@ -1,36 +1,27 @@
 ﻿using CareerPlatform.BusinessLogic.Interfaces;
 using CareerPlatform.DataAccess.DTOs;
 using CareerPlatform.DataAccess.Entities;
+using CareerPlatform.DataAccess.Validators;
 using CareerPlatform.Shared.Exceptions;
 using JWTAuthentication.NET6._0.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
 using System.Security.Claims;
 
 namespace CareerPlatform.API.Controllers
 {
     [Route("api/authenticate")]
     [ApiController]
-    public class AuthenticateController : ControllerBase
-    {
-        private readonly ILogger<AuthenticateController> _logger;
-        private readonly IPasswordReminderService _passwordReminderService;
-        private readonly IUserService _userService;
-        private readonly IAuthenticateService _authenticateService;
+    
+    //TODO  
+    //correct logErrors and return messages to clear and understandable
 
-        public AuthenticateController(
-            ILogger<AuthenticateController> logger,
-            IUserService userService,
-            IPasswordReminderService passwordReminderService,
-            IAuthenticateService authenticateService)
-        {
-            _logger = logger;
-            _userService = userService;
-            _passwordReminderService = passwordReminderService;
-            _authenticateService = authenticateService;
-        }
+    public class AuthenticateController(ILogger<AuthenticateController> _logger,
+            IUserService _userService,
+            IPasswordReminderService _passwordReminderService,
+            IAuthenticateService _authenticateService) : ControllerBase
+    {
       
         /// <summary>
         /// Registers new user
@@ -45,16 +36,27 @@ namespace CareerPlatform.API.Controllers
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
+
+            var validator = new RegisterValidator();
+            var validationResult = await validator.ValidateAsync(model);
+
+            if (!validationResult.IsValid)
+            {
+                var errorMessages = string.Join(", ", validationResult.Errors.Select(error => error.ErrorMessage));
+                return BadRequest($"Validation failed: {errorMessages}");
+            }
+
             try
             {
                 IdentityResult result = await _authenticateService.RegisterUserAsync(model);
-
+                    
                 if (!result.Succeeded)
                 {
-                    return BadRequest("User creation failed! Please check user details and try again.");
+                    _logger.LogError("User was not able to be registered.");
+                    return BadRequest("User registration failed! Please check user details and try again.");
                 }
 
-                return Ok("User created successfully!");
+                return Ok("User created successfully.");
             }
             catch (ArgumentNullException e)
             {
@@ -78,18 +80,26 @@ namespace CareerPlatform.API.Controllers
         /// </summary>
         /// <response code="200">Success</response>
         /// <response code="400">Bad request</response>
-        /// <response code="401">Unauthorized</response>
-        /// <response code="404">No found</response>
+        /// <response code="404">Not found</response>
         /// <response code="500">Server side error</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
+
+            var validator = new LoginValidator();
+            var validationResult = await validator.ValidateAsync(model);
+
+            if (!validationResult.IsValid)
+            {
+                var errorMessages = string.Join(", ", validationResult.Errors.Select(error => error.ErrorMessage));
+                return BadRequest($"Validation failed: {errorMessages}");
+            }
+
             try
             {
                 User user = await _userService.GetUserByNameAsync(model);
@@ -188,8 +198,8 @@ namespace CareerPlatform.API.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e.Message);
-                return BadRequest($"Server side error: {e.Message}");
+                _logger.LogError($"Server side error occured: {e.Message}");
+                return StatusCode(500, $"Server side error occured: {e.Message}");
             }
         }
 
@@ -263,12 +273,14 @@ namespace CareerPlatform.API.Controllers
 
                 if (user is null)
                 {
+                    _logger.LogError($"User with the email {user?.Email} was not found");
                     return BadRequest($"User with the email {user?.Email} was not found");
                 }
 
                 if (request.Password == null)
                 {
-                    return BadRequest("Your must enter new password in order to reset it");
+                    _logger.LogError("Your must enter new password in order to reset it.");
+                    return BadRequest("Your must enter new password in order to reset it.");
                 }
 
                 IdentityResult result = await _authenticateService.ResetPasswordAsync(user, request.Token, request.Password);
@@ -279,13 +291,14 @@ namespace CareerPlatform.API.Controllers
                 }
                 else
                 {
+                    _logger.LogError("Password reset operation was not successfull.");
                     return BadRequest(result.Errors);
                 }
             }
             catch (Exception e)
             {
-                _logger.LogError(e.Message);
-                return BadRequest("Failed to reset password");
+                _logger.LogError($"Server side error occured: {e.Message}");
+                return StatusCode(500, $"Server side error occured: {e.Message}");
             }
         }
 
@@ -313,20 +326,21 @@ namespace CareerPlatform.API.Controllers
 
                 if (!result.Succeeded)
                 {
-                    return BadRequest("Password could not be changed. Something went wrong");
+                    _logger.LogError("An attempt to change user's password was unsuccessfull.");
+                    return BadRequest("An attempt to change user's password was unsuccessfull.");
                 }
 
                 return Ok("Password was changed successfully");
             }
-            catch (TargetInvocationException e)
+            catch (PasswordChangeFailedException e)
             {
                 _logger.LogError(e.Message);
                 return BadRequest(e.Message);
             }
             catch (Exception e)
             {
-                _logger.LogError(e.Message);
-                return BadRequest(e.Message);
+                _logger.LogError($"Server side error occured: {e.Message}");
+                return StatusCode(500, $"Server side error occured: {e.Message}");
             }
         }
 
@@ -347,13 +361,13 @@ namespace CareerPlatform.API.Controllers
         {
             try
             {
-                if(string.IsNullOrEmpty(registrationConfirmationRequestDto.email) || string.IsNullOrEmpty(registrationConfirmationRequestDto.token))
+                if(string.IsNullOrEmpty(registrationConfirmationRequestDto.Email) || string.IsNullOrEmpty(registrationConfirmationRequestDto.Token))
                 {
                     return BadRequest("Registration could not be confirmed.");
                 }
 
-                string decryptedEmail = await _authenticateService.DecryptConfirmationEmailAsync(registrationConfirmationRequestDto.email);
-                string decrypteToken = await _authenticateService.DecryptConfirmationTokenAsync(registrationConfirmationRequestDto.token);
+                string decryptedEmail = await _authenticateService.DecryptConfirmationEmailAsync(registrationConfirmationRequestDto.Email);
+                string decrypteToken = await _authenticateService.DecryptConfirmationTokenAsync(registrationConfirmationRequestDto.Token);
 
                 var user = await _userService.GetUserByEmailAddressAsync(decryptedEmail);
 
@@ -378,8 +392,8 @@ namespace CareerPlatform.API.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e.Message);
-                return BadRequest(e.Message);
+                _logger.LogError($"Server side error occured: {e.Message}");
+                return StatusCode(500, $"Server side error occured: {e.Message}");
             }
         }
 
