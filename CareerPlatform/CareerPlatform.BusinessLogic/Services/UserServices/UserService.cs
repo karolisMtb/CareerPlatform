@@ -4,7 +4,6 @@ using CareerPlatform.Shared.Exceptions;
 using JWTAuthentication.NET6._0.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using System.Reflection;
 using System.Security.Claims;
 
 namespace CareerPlatform.BusinessLogic.Services.UserServices

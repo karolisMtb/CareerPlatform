@@ -117,13 +117,13 @@ namespace CareerPlatform.API.Controllers
             }
             catch (UserNotFoundException e)
             {
-                _logger.LogError($"User was not found. Check and try again: {e.Message}");
-                return BadRequest($"User was not found. Check and try again: {e.Message}");
+                _logger.LogError($"Unsuccessfull attempt to login: {e.Message}");
+                return NotFound($"Unsuccessfull attempt to login: {e.Message}");
             }
             catch (ArgumentNullException e)
             {
-                _logger.LogError($"Login was unsuccessfull: {e.Message}");
-                return BadRequest($"Login was unsuccessfull: {e.Message}");
+                _logger.LogError($"Login was unsuccessfull due to wrong input: {e.Message}");
+                return BadRequest($"Login was unsuccessfull due to wrong input: {e.Message}");
             }
             catch (Exception e)
             {

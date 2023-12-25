@@ -15,11 +15,11 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
             var decodedEmail = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(email));
             bool validEmail = false;
 
-            User user = await _userManager.FindByEmailAsync(decodedEmail);
+            User? user = await _userManager.FindByEmailAsync(decodedEmail);
 
-            if(user == null)
+            if(user is null)
             {
-                throw new UserNotFoundException("User could not be found. Please check your email and try again");
+                throw new UserNotFoundException("Password reminder servise could not process email or token validation.");
             }
 
             bool validToken = await _userManager.VerifyUserTokenAsync(
@@ -31,7 +31,7 @@ namespace CareerPlatform.BusinessLogic.Services.SecurityServices
 
             if(validToken == false)
             {
-                throw new ArgumentNullException("Invalid varification argument");
+                throw new ArgumentNullException("Invalid varification varificattion argument received.");
             }
 
             if(validToken == true)
