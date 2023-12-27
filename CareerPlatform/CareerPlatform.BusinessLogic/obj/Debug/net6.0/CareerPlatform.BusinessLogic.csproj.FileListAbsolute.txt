@@ -1,6 +1,0 @@
-C:\Users\Karolis\Desktop\CareerPlatform\CareerPlatform\CareerPlatform.BusinessLogic\obj\Debug\net6.0\CareerPlatform.BusinessLogic.csproj.AssemblyReference.cache
-C:\Users\Karolis\Desktop\CareerPlatform\CareerPlatform\CareerPlatform.BusinessLogic\obj\Debug\net6.0\CareerPlatform.BusinessLogic.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Karolis\Desktop\CareerPlatform\CareerPlatform\CareerPlatform.BusinessLogic\obj\Debug\net6.0\CareerPlatform.BusinessLogic.AssemblyInfoInputs.cache
-C:\Users\Karolis\Desktop\CareerPlatform\CareerPlatform\CareerPlatform.BusinessLogic\obj\Debug\net6.0\CareerPlatform.BusinessLogic.AssemblyInfo.cs
-C:\Users\Karolis\Desktop\CareerPlatform\CareerPlatform\CareerPlatform.BusinessLogic\obj\Debug\net6.0\CareerPlatform.BusinessLogic.csproj.CoreCompileInputs.cache
-C:\Users\Karolis\Desktop\CareerPlatform\CareerPlatform\CareerPlatform.BusinessLogic\obj\Debug\net6.0\CareerPlatform.BusinessLogic.sourcelink.json
