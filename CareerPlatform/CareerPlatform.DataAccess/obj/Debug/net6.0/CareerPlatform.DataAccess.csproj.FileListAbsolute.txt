@@ -1,0 +1,6 @@
+C:\Users\Karolis\Desktop\CareerPlatform\CareerPlatform\CareerPlatform.DataAccess\obj\Debug\net6.0\CareerPlatform.DataAccess.csproj.AssemblyReference.cache
+C:\Users\Karolis\Desktop\CareerPlatform\CareerPlatform\CareerPlatform.DataAccess\obj\Debug\net6.0\CareerPlatform.DataAccess.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Karolis\Desktop\CareerPlatform\CareerPlatform\CareerPlatform.DataAccess\obj\Debug\net6.0\CareerPlatform.DataAccess.AssemblyInfoInputs.cache
+C:\Users\Karolis\Desktop\CareerPlatform\CareerPlatform\CareerPlatform.DataAccess\obj\Debug\net6.0\CareerPlatform.DataAccess.AssemblyInfo.cs
+C:\Users\Karolis\Desktop\CareerPlatform\CareerPlatform\CareerPlatform.DataAccess\obj\Debug\net6.0\CareerPlatform.DataAccess.csproj.CoreCompileInputs.cache
+C:\Users\Karolis\Desktop\CareerPlatform\CareerPlatform\CareerPlatform.DataAccess\obj\Debug\net6.0\CareerPlatform.DataAccess.sourcelink.json
