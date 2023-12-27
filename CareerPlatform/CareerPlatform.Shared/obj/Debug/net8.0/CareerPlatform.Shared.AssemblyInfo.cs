@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CareerPlatform.Shared")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4ea1ade9593aa8d729fb09932089e1e685cc58f9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e94c17dac6583a6f55f5467f24f01f8dc816fe1d")]
 [assembly: System.Reflection.AssemblyProductAttribute("CareerPlatform.Shared")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CareerPlatform.Shared")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
