@@ -1,0 +1,15 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/CareerPlatform/CareerPlatform/bin
+/CareerPlatform/CareerPlatform/obj
+/CareerPlatform/.vs
+/CareerPlatform/CareerPlatform.BusinessLogic/obj
+/CareerPlatform/CareerPlatform.DataAccess/bin/Debug/net6.0
+/CareerPlatform/CareerPlatform.DataAccess/obj
+/CareerPlatform/CareerPlatform.Shared/bin/Debug/net6.0
+/CareerPlatform/CareerPlatform.Shared/obj
+/CareerPlatform/CareerPlatform.Tests/bin/Debug/net6.0
+/CareerPlatform/CareerPlatform.Tests/obj
+/CareerPlatform/CareerPlatform.BusinessLogic/bin/Debug/net6.0
